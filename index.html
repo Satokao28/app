@@ -5,47 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎨 モチベキャンパス</title>
     <style>
-        /* スムーズなスクロール（サイドバーのリンクを押した時用） */
         html { scroll-behavior: smooth; }
-        
-        /* 全体のレイアウト設定（サイドバーとメインコンテンツを分ける） */
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f0f2f5; margin: 0; color: #333; display: flex; }
         
-        /* --- 新規：サイドバーのデザイン --- */
-        .sidebar {
-            width: 220px; background-color: #2d3748; color: white; position: fixed; top: 0; left: 0; height: 100vh; padding: 20px; box-sizing: border-box; box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-        }
+        /* サイドバー */
+        .sidebar { width: 220px; background-color: #2d3748; color: white; position: fixed; top: 0; left: 0; height: 100vh; padding: 20px; box-sizing: border-box; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
         .sidebar h2 { margin-top: 0; font-size: 1.2em; border-bottom: 1px solid #4a5568; padding-bottom: 15px; margin-bottom: 20px; }
-        .sidebar a {
-            display: block; color: #e2e8f0; text-decoration: none; padding: 12px; margin-bottom: 10px; border-radius: 6px; transition: background 0.2s; font-weight: bold;
-        }
+        .sidebar a { display: block; color: #e2e8f0; text-decoration: none; padding: 12px; margin-bottom: 10px; border-radius: 6px; transition: background 0.2s; font-weight: bold; }
         .sidebar a:hover { background-color: #4a5568; }
 
-        /* メインコンテンツ（サイドバーの右側） */
-        .main-content {
-            margin-left: 220px; padding: 30px; width: calc(100% - 220px); box-sizing: border-box;
-        }
-
+        /* メインコンテンツ */
+        .main-content { margin-left: 220px; padding: 30px; width: calc(100% - 220px); box-sizing: border-box; }
         h1 { color: #4a5568; margin-top: 0; margin-bottom: 25px; }
         .app-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1200px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); scroll-margin-top: 30px; } /* scroll-margin-topでジャンプ位置を調整 */
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); scroll-margin-top: 30px; }
         .card h2 { margin-top: 0; color: #4c51bf; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
         
-        /* 入力フォーム類 */
         input[type="text"], input[type="date"], select { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; }
-        .input-group { display: flex; gap: 10px; align-items: center; } /* 横並び用 */
+        .input-group { display: flex; gap: 10px; align-items: center; }
         
-        /* ボタン類 */
         .btn { background-color: #4c51bf; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.2s; }
         .btn:hover { background-color: #434190; }
         .btn-small { padding: 6px 12px; width: auto; font-size: 0.9em; }
-        .btn-today { background-color: #3182ce; } /* 「今月」ボタン用の青色 */
+        .btn-today { background-color: #3182ce; }
         
-        /* 課題・予定・メモのリスト共通デザイン */
         .list-item { background: #f7fafc; padding: 10px; border-radius: 6px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; }
         .list-item-task { border-left: 4px solid #e53e3e; }
-        .list-item-event { border-left: 4px solid #38a169; } /* 予定は緑色 */
-        .list-item-memo { border-left: 4px solid #ecc94b; } /* メモは黄色 */
+        .list-item-memo { border-left: 4px solid #ecc94b; }
         .btn-delete { background-color: #a0aec0; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
         .btn-delete:hover { background-color: #718096; }
         .btn-done { background-color: #38a169; }
@@ -68,9 +54,13 @@
         .cal-day { background-color: white; min-height: 90px; padding: 5px; box-sizing: border-box; }
         .cal-day-empty { background-color: #f7fafc; }
         .cal-date-num { font-size: 0.85em; color: #718096; margin-bottom: 5px; }
-        .cal-label { font-size: 0.75em; padding: 2px 4px; border-radius: 3px; margin-bottom: 3px; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-        .cal-label-task { background-color: #fed7d7; color: #c53030; } /* 課題は赤 */
-        .cal-label-event { background-color: #c6f6d5; color: #22543d; } /* 予定は緑 */
+        
+        /* カレンダー内のラベル（マウスを乗せるとクリックできることがわかるように変更） */
+        .cal-label { font-size: 0.75em; padding: 2px 4px; border-radius: 3px; margin-bottom: 3px; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; transition: 0.2s; }
+        .cal-label:hover { opacity: 0.7; } /* ホバー時に少し薄くする */
+        .cal-label-task { background-color: #fed7d7; color: #c53030; cursor: default; } /* 課題はリストから消すのでポインターなし */
+        .cal-label-task:hover { opacity: 1; }
+        .cal-label-event { background-color: #c6f6d5; color: #22543d; } 
     </style>
 </head>
 <body>
@@ -117,7 +107,8 @@
                         <input type="date" id="eventDate" style="flex: 1;">
                         <button class="btn" style="flex: 1;" onclick="addEvent()">予定追加</button>
                     </div>
-                    <div id="eventListView"></div> </div>
+                    <p style="font-size: 0.85em; color: gray; margin-top: 5px;">※予定を削除したい時は、カレンダー上の緑のラベルを直接クリックしてください。</p>
+                </div>
             </div>
 
             <div id="card-tasks" class="card">
@@ -144,19 +135,13 @@
     </div>
 
     <script>
-        // ==========================================
-        // 1. 各種データ読み込み
-        // ==========================================
         let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
-        let events = JSON.parse(localStorage.getItem('myEvents')) || []; // 新規：予定データ
-        let memos = JSON.parse(localStorage.getItem('myMemos')) || [];   // 新規：複数メモデータ
+        let events = JSON.parse(localStorage.getItem('myEvents')) || [];
+        let memos = JSON.parse(localStorage.getItem('myMemos')) || [];
         let timetableData = JSON.parse(localStorage.getItem('myTimetable')) || {};
-        
         let currentDate = new Date();
 
-        // ==========================================
-        // 2. 時間割の処理
-        // ==========================================
+        // 1. 時間割
         const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
         const periods = [1, 2, 3, 4, 5];
         const tbody = document.getElementById('timetableBody');
@@ -166,7 +151,6 @@
             let periodTh = document.createElement('th');
             periodTh.textContent = period;
             row.appendChild(periodTh);
-
             days.forEach(day => {
                 let td = document.createElement('td');
                 let cellId = `tt-${day}-${period}`;
@@ -204,9 +188,7 @@
         }
         updateSubjectDropdown();
 
-        // ==========================================
-        // 3. カレンダーの処理
-        // ==========================================
+        // 2. カレンダー
         function renderCalendar() {
             const grid = document.getElementById('calendarGrid');
             const display = document.getElementById('monthYearDisplay');
@@ -238,7 +220,6 @@
                 
                 const num = document.createElement('div');
                 num.className = 'cal-date-num';
-                // 今日の日付なら色を変える
                 const today = new Date();
                 if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) {
                     num.style.color = 'white'; num.style.backgroundColor = '#3182ce'; num.style.borderRadius = '50%'; num.style.width = '20px'; num.style.textAlign = 'center';
@@ -248,19 +229,25 @@
                 
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
                 
-                // 課題の表示（赤）
+                // 課題表示
                 tasks.filter(t => t.date === dateStr).forEach(t => {
                     const label = document.createElement('div');
                     label.className = 'cal-label cal-label-task';
                     label.textContent = `🚨 ${t.subject ? t.subject + ':' : ''} ${t.title}`;
+                    label.title = t.title;
                     dayCell.appendChild(label);
                 });
 
-                // 予定の表示（緑）
+                // ★予定表示（クリックで削除可能に）
                 events.filter(e => e.date === dateStr).forEach(e => {
                     const label = document.createElement('div');
                     label.className = 'cal-label cal-label-event';
                     label.textContent = `🎈 ${e.title}`;
+                    label.title = "クリックで削除";
+                    // クリックイベントを追加
+                    label.onclick = function() {
+                        deleteEventFromCalendar(e.id, e.title);
+                    };
                     dayCell.appendChild(label);
                 });
                 
@@ -270,11 +257,9 @@
 
         function prevMonth() { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); }
         function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); }
-        function resetMonth() { currentDate = new Date(); renderCalendar(); } // ★「今月」に戻る機能
+        function resetMonth() { currentDate = new Date(); renderCalendar(); }
 
-        // ==========================================
-        // 4. 予定（イベント）の管理処理
-        // ==========================================
+        // 3. 予定の追加と削除（リストを使わず直接操作）
         function addEvent() {
             const titleInput = document.getElementById('eventTitle');
             const dateInput = document.getElementById('eventDate');
@@ -285,32 +270,19 @@
             titleInput.value = ''; dateInput.value = '';
             
             renderCalendar();
-            renderEvents();
         }
 
-        function deleteEvent(id) {
-            events = events.filter(e => e.id !== id);
-            localStorage.setItem('myEvents', JSON.stringify(events));
-            renderCalendar();
-            renderEvents();
+        // カレンダー上から直接削除するための関数
+        function deleteEventFromCalendar(id, title) {
+            // 確認ダイアログを出す
+            if (confirm(`予定「${title}」を削除しますか？`)) {
+                events = events.filter(e => e.id !== id);
+                localStorage.setItem('myEvents', JSON.stringify(events));
+                renderCalendar();
+            }
         }
 
-        function renderEvents() {
-            const view = document.getElementById('eventListView');
-            view.innerHTML = '';
-            // カレンダーの下に、未来の予定だけを一覧表示
-            const upcomingEvents = events.sort((a, b) => new Date(a.date) - new Date(b.date));
-            upcomingEvents.forEach(e => {
-                const item = document.createElement('div');
-                item.className = 'list-item list-item-event';
-                item.innerHTML = `<span><strong>${e.title}</strong> <small>(${e.date})</small></span> <button class="btn-delete" onclick="deleteEvent(${e.id})">削除</button>`;
-                view.appendChild(item);
-            });
-        }
-
-        // ==========================================
-        // 5. 課題の管理処理
-        // ==========================================
+        // 4. 課題
         function addTask() {
             const subject = document.getElementById('taskSubject').value;
             const title = document.getElementById('taskTitle').value;
@@ -344,17 +316,13 @@
             });
         }
 
-        // ==========================================
-        // 6. 複数メモの管理処理
-        // ==========================================
+        // 5. メモ
         function addMemo() {
             const input = document.getElementById('memoInput');
             if (!input.value) return;
-
             memos.push({ id: Date.now(), text: input.value });
             localStorage.setItem('myMemos', JSON.stringify(memos));
-            input.value = '';
-            renderMemos();
+            input.value = ''; renderMemos();
         }
 
         function deleteMemo(id) {
@@ -367,7 +335,6 @@
             const view = document.getElementById('memoListView');
             view.innerHTML = '';
             if (memos.length === 0) return view.innerHTML = '<p style="color:gray;">メモはありません。</p>';
-
             memos.forEach(m => {
                 const item = document.createElement('div');
                 item.className = 'list-item list-item-memo';
@@ -376,11 +343,8 @@
             });
         }
 
-        // ==========================================
-        // ★起動時の初期描画
-        // ==========================================
+        // 初期描画
         renderCalendar();
-        renderEvents();
         renderTasks();
         renderMemos();
     </script>
