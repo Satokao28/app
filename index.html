@@ -16,6 +16,7 @@
         input[type="text"], input[type="date"], textarea, select { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; }
         .btn { background-color: #4c51bf; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; }
         .btn:hover { background-color: #434190; }
+        .btn-small { padding: 5px 10px; width: auto; font-size: 0.9em; }
         
         /* 課題リスト */
         .task-item { background: #f7fafc; padding: 10px; border-radius: 6px; margin-top: 8px; border-left: 4px solid #e53e3e; display: flex; justify-content: space-between; align-items: center; }
@@ -29,6 +30,18 @@
         .timetable td input { width: 100%; height: 100%; border: none; padding: 12px 4px; text-align: center; box-sizing: border-box; font-size: 0.9em; background: transparent; margin: 0; border-radius: 0; }
         .timetable td input:focus { outline: 2px solid #4c51bf; background: #fff; position: relative; z-index: 1; }
         .timetable th:first-child { width: 30px; }
+
+        /* --- 新規：月間カレンダーのデザイン --- */
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .calendar-header h3 { margin: 0; color: #2d3748; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background-color: #cbd5e0; border: 1px solid #cbd5e0; border-radius: 6px; overflow: hidden; }
+        .cal-head { background-color: #edf2f7; text-align: center; padding: 8px 0; font-weight: bold; font-size: 0.9em; color: #4a5568; }
+        .cal-head:first-child { color: #e53e3e; } /* 日曜日を赤く */
+        .cal-head:last-child { color: #3182ce; } /* 土曜日を青く */
+        .cal-day { background-color: white; min-height: 80px; padding: 5px; box-sizing: border-box; }
+        .cal-day-empty { background-color: #f7fafc; }
+        .cal-date-num { font-size: 0.85em; color: #718096; margin-bottom: 5px; }
+        .cal-task-label { background-color: #fed7d7; color: #c53030; font-size: 0.75em; padding: 2px 4px; border-radius: 3px; margin-bottom: 3px; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
     </style>
 </head>
 <body>
@@ -47,6 +60,17 @@
             </table>
         </div>
 
+        <div class="card" style="grid-column: span 2;">
+            <h2>👀 月間カレンダー</h2>
+            <div class="calendar-header">
+                <button class="btn btn-small" onclick="prevMonth()">◀ 先月</button>
+                <h3 id="monthYearDisplay">2026年 7月</h3>
+                <button class="btn btn-small" onclick="nextMonth()">来月 ▶</button>
+            </div>
+            <div id="calendarGrid" class="calendar-grid">
+                </div>
+        </div>
+
         <div class="card">
             <h2>📝 課題の追加・一覧</h2>
             <div>
@@ -61,14 +85,8 @@
         </div>
 
         <div class="card">
-            <h2>👀 連動カレンダービュー</h2>
-            <p style="font-size: 0.9em; color: gray;">提出が必要な課題がここに自動連動します。</p>
-            <div id="calendarView"></div>
-        </div>
-
-        <div class="card" style="grid-column: span 2;">
             <h2>✏️ 自由なメモ</h2>
-            <textarea id="memoArea" rows="4" placeholder="忘れたくないこと、日記など自由にどうぞ！" oninput="saveMemo()"></textarea>
+            <textarea id="memoArea" rows="10" placeholder="忘れたくないこと、日記など自由にどうぞ！" oninput="saveMemo()"></textarea>
         </div>
 
     </div>
@@ -80,6 +98,9 @@
         let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
         document.getElementById('memoArea').value = localStorage.getItem('myMemo') || '';
         let timetableData = JSON.parse(localStorage.getItem('myTimetable')) || {};
+        
+        // カレンダー用の現在表示している年月データ
+        let currentDate = new Date();
 
         // ==========================================
         // 2. 時間割の生成と保存
@@ -103,39 +124,25 @@
             tbody.appendChild(row);
         });
 
-        // 起動時に保存データをマスに入れる
         for (let cellId in timetableData) {
             let inputElement = document.getElementById(cellId);
-            if (inputElement) {
-                inputElement.value = timetableData[cellId];
-            }
+            if (inputElement) inputElement.value = timetableData[cellId];
         }
 
-        // 入力時の自動保存 ＋ ドロップダウンの更新！
         function saveTimetable(cellId) {
             timetableData[cellId] = document.getElementById(cellId).value;
             localStorage.setItem('myTimetable', JSON.stringify(timetableData));
-            updateSubjectDropdown(); // 時間割が変わったら選択肢も更新する
+            updateSubjectDropdown();
         }
 
-        // ==========================================
-        // ★新規：ドロップダウンリストを更新する関数
-        // ==========================================
         function updateSubjectDropdown() {
             const select = document.getElementById('taskSubject');
-            select.innerHTML = '<option value="">教科を選択 (任意)</option>'; // 初期化
-            
-            let subjects = new Set(); // 重複を防ぐためのリスト（Set）
-
-            // 時間割データから文字が入っているものを集める
+            select.innerHTML = '<option value="">教科を選択 (任意)</option>'; 
+            let subjects = new Set();
             for (let key in timetableData) {
                 let val = timetableData[key].trim();
-                if (val !== "") {
-                    subjects.add(val);
-                }
+                if (val !== "") subjects.add(val);
             }
-
-            // 集めた教科を選択肢として追加する
             subjects.forEach(subject => {
                 let option = document.createElement('option');
                 option.value = subject;
@@ -143,16 +150,86 @@
                 select.appendChild(option);
             });
         }
-        
-        updateSubjectDropdown(); // アプリ起動時にも1回実行しておく
+        updateSubjectDropdown();
 
         // ==========================================
-        // 3. 課題管理と連動
+        // 3. ★新規：月間カレンダーの生成
         // ==========================================
-        renderTasks();
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const display = document.getElementById('monthYearDisplay');
+            
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth(); // 0が1月, 11が12月
+            
+            display.textContent = `${year}年 ${month + 1}月`;
+            grid.innerHTML = '';
+            
+            // 曜日のヘッダー作成
+            const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+            dayNames.forEach(d => {
+                const head = document.createElement('div');
+                head.className = 'cal-head';
+                head.textContent = d;
+                grid.appendChild(head);
+            });
+            
+            // 月の最初の日が何曜日か、月の日数が何日かを取得
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            // 1日の前の空白マスを埋める
+            for (let i = 0; i < firstDay; i++) {
+                const empty = document.createElement('div');
+                empty.className = 'cal-day cal-day-empty';
+                grid.appendChild(empty);
+            }
+            
+            // 日付のマスを作成
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'cal-day';
+                
+                // 日付の数字
+                const num = document.createElement('div');
+                num.className = 'cal-date-num';
+                num.textContent = i;
+                dayCell.appendChild(num);
+                
+                // このマスの日付を YYYY-MM-DD 形式の文字列にする（課題データと比較するため）
+                const mStr = String(month + 1).padStart(2, '0');
+                const dStr = String(i).padStart(2, '0');
+                const dateStr = `${year}-${mStr}-${dStr}`;
+                
+                // この日付に該当する課題を探してマスに追加
+                const dayTasks = tasks.filter(t => t.date === dateStr);
+                dayTasks.forEach(t => {
+                    const label = document.createElement('div');
+                    label.className = 'cal-task-label';
+                    label.textContent = t.subject ? `${t.subject}: ${t.title}` : t.title;
+                    label.title = t.title; // マウスを乗せると全文表示
+                    dayCell.appendChild(label);
+                });
+                
+                grid.appendChild(dayCell);
+            }
+        }
 
+        // 先月・来月ボタンの処理
+        function prevMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        // ==========================================
+        // 4. 課題管理と連動
+        // ==========================================
         function addTask() {
-            const subjectInput = document.getElementById('taskSubject'); // 追加
+            const subjectInput = document.getElementById('taskSubject');
             const titleInput = document.getElementById('taskTitle');
             const dateInput = document.getElementById('taskDate');
             
@@ -163,7 +240,7 @@
 
             const newTask = {
                 id: Date.now(),
-                subject: subjectInput.value, // 教科のデータも一緒に保存
+                subject: subjectInput.value,
                 title: titleInput.value,
                 date: dateInput.value
             };
@@ -171,38 +248,32 @@
             tasks.push(newTask);
             localStorage.setItem('myTasks', JSON.stringify(tasks));
             renderTasks();
+            renderCalendar(); // ★追加：課題を追加したらカレンダーも更新
             
             titleInput.value = '';
             dateInput.value = '';
-            subjectInput.value = ''; // 教科の選択もリセット
+            subjectInput.value = '';
         }
 
         function completeTask(id) {
             tasks = tasks.filter(task => task.id !== id);
             localStorage.setItem('myTasks', JSON.stringify(tasks));
             renderTasks();
+            renderCalendar(); // ★追加：課題を完了したらカレンダーも更新
         }
 
         function renderTasks() {
             const taskListView = document.getElementById('taskListView');
-            const calendarView = document.getElementById('calendarView');
-            
             taskListView.innerHTML = '';
-            calendarView.innerHTML = '';
 
             if (tasks.length === 0) {
                 taskListView.innerHTML = '<p style="color:gray;">未完了の課題はありません。✨</p>';
-                calendarView.innerHTML = '<p style="color:gray;">予定されている課題はありません。✨</p>';
                 return;
             }
 
             const sortedTasks = tasks.sort((a, b) => new Date(a.date) - new Date(b.date));
-
             sortedTasks.forEach(task => {
-                // 教科が選択されていれば、専用のバッジ（小さな枠）を作る
                 const subjectBadge = task.subject ? `<span class="subject-badge">${task.subject}</span>` : '';
-
-                // 課題一覧側
                 const taskItem = document.createElement('div');
                 taskItem.className = 'task-item';
                 taskItem.innerHTML = `
@@ -213,25 +284,19 @@
                     <button class="btn-done" onclick="completeTask(${task.id})">完了</button>
                 `;
                 taskListView.appendChild(taskItem);
-
-                // カレンダー側
-                const calItem = document.createElement('div');
-                calItem.style.margin = "10px 0";
-                calItem.style.padding = "10px";
-                calItem.style.backgroundColor = "#fff5f5";
-                calItem.style.borderLeft = "4px solid #f56565";
-                calItem.style.borderRadius = "4px";
-                calItem.innerHTML = `🚨 <strong>${task.date}</strong> ➔ ${subjectBadge} ${task.title}`;
-                calendarView.appendChild(calItem);
             });
         }
 
         // ==========================================
-        // 4. メモの自動保存
+        // 5. メモの自動保存と初期実行
         // ==========================================
         function saveMemo() {
             localStorage.setItem('myMemo', document.getElementById('memoArea').value);
         }
+
+        // 起動時にリストとカレンダーを描画
+        renderTasks();
+        renderCalendar();
     </script>
 </body>
 </html>
