@@ -6,52 +6,29 @@
     <title>🎨 モチベキャンパス</title>
     <style>
         /* 全体のデザイン設定 */
-        body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; color: #333; }
         h1 { text-align: center; color: #4a5568; margin-bottom: 25px; }
-        
-        /* 画面を2×2のグリッド（格子状）に綺麗に並べる */
-        .app-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        /* 各パネル（カード）のデザイン */
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            min-height: 250px;
-        }
+        .app-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1200px; margin: 0 auto; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-height: 250px; }
         .card h2 { margin-top: 0; color: #4c51bf; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
         
-        /* 入力フォームやボタンのデザイン */
-        input, textarea, select {
-            width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;
-        }
-        .btn {
-            background-color: #4c51bf; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold;
-        }
+        /* 共通入力フォームやボタン */
+        input[type="text"], input[type="date"], textarea, select { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; }
+        .btn { background-color: #4c51bf; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; }
         .btn:hover { background-color: #434190; }
         
-        /* 課題リストのデザイン */
-        .task-item {
-            background: #f7fafc; padding: 10px; border-radius: 6px; margin-top: 8px; border-left: 4px solid #e53e3e;
-            display: flex; justify-content: space-between; align-items: center;
-        }
+        /* 課題リスト */
+        .task-item { background: #f7fafc; padding: 10px; border-radius: 6px; margin-top: 8px; border-left: 4px solid #e53e3e; display: flex; justify-content: space-between; align-items: center; }
         .btn-done { background-color: #38a169; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .subject-badge { background-color: #e2e8f0; color: #4a5568; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-right: 5px; font-weight: bold; }
         
-        /* カレンダー・時間割の簡易表示用 */
-        .schedule-zone { background: #edf2f7; padding: 10px; border-radius: 6px; min-height: 100px; margin-top: 10px; }
+        /* 時間割テーブル */
+        .timetable { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+        .timetable th, .timetable td { border: 1px solid #cbd5e0; text-align: center; padding: 0; }
+        .timetable th { background-color: #edf2f7; padding: 8px 0; font-size: 0.9em; color: #4a5568; }
+        .timetable td input { width: 100%; height: 100%; border: none; padding: 12px 4px; text-align: center; box-sizing: border-box; font-size: 0.9em; background: transparent; margin: 0; border-radius: 0; }
+        .timetable td input:focus { outline: 2px solid #4c51bf; background: #fff; position: relative; z-index: 1; }
+        .timetable th:first-child { width: 30px; }
     </style>
 </head>
 <body>
@@ -60,51 +37,122 @@
 
     <div class="app-container">
 
-        <div class="card">
+        <div class="card" style="grid-column: span 2;">
             <h2>📅 大学の時間割</h2>
-            <p>※ここは今後、曜日ごとの表にしていきます！</p>
-            <div class="schedule-zone">
-                <strong>月曜日:</strong> 1限 英語 / 2限 プログラミング<br>
-                <strong>火曜日:</strong> 3限 経済学
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>👀 連動カレンダービュー</h2>
-            <p>提出が必要な課題がここに自動連動します。</p>
-            <div id="calendarView">
-                </div>
+            <table class="timetable">
+                <thead>
+                    <tr><th></th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th></tr>
+                </thead>
+                <tbody id="timetableBody"></tbody>
+            </table>
         </div>
 
         <div class="card">
             <h2>📝 課題の追加・一覧</h2>
             <div>
+                <select id="taskSubject">
+                    <option value="">教科を選択 (任意)</option>
+                </select>
                 <input type="text" id="taskTitle" placeholder="課題名を入力 (例: レポート)">
                 <input type="date" id="taskDate">
                 <button class="btn" onclick="addTask()">課題を追加する</button>
             </div>
-            <div id="taskListView">
-                </div>
+            <div id="taskListView"></div>
         </div>
 
         <div class="card">
+            <h2>👀 連動カレンダービュー</h2>
+            <p style="font-size: 0.9em; color: gray;">提出が必要な課題がここに自動連動します。</p>
+            <div id="calendarView"></div>
+        </div>
+
+        <div class="card" style="grid-column: span 2;">
             <h2>✏️ 自由なメモ</h2>
-            <textarea id="memoArea" rows="8" placeholder="忘れたくないこと、日記、モチベの上がる言葉など自由にどうぞ！" oninput="saveMemo()"></textarea>
+            <textarea id="memoArea" rows="4" placeholder="忘れたくないこと、日記など自由にどうぞ！" oninput="saveMemo()"></textarea>
         </div>
 
     </div>
 
     <script>
-        // --- アプリ起動時にデータを読み込む ---
-        // ブラウザのLocalStorageからデータを取得（なければ空っぽの配列）
+        // ==========================================
+        // 1. データ読み込み
+        // ==========================================
         let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
-        
-        // 起動時に画面を描画する
-        renderTasks();
         document.getElementById('memoArea').value = localStorage.getItem('myMemo') || '';
+        let timetableData = JSON.parse(localStorage.getItem('myTimetable')) || {};
 
-        // --- 課題を追加する関数 ---
+        // ==========================================
+        // 2. 時間割の生成と保存
+        // ==========================================
+        const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
+        const periods = [1, 2, 3, 4, 5];
+        const tbody = document.getElementById('timetableBody');
+
+        periods.forEach(period => {
+            let row = document.createElement('tr');
+            let periodTh = document.createElement('th');
+            periodTh.textContent = period;
+            row.appendChild(periodTh);
+
+            days.forEach(day => {
+                let td = document.createElement('td');
+                let cellId = `tt-${day}-${period}`;
+                td.innerHTML = `<input type="text" id="${cellId}" placeholder=" " oninput="saveTimetable('${cellId}')">`;
+                row.appendChild(td);
+            });
+            tbody.appendChild(row);
+        });
+
+        // 起動時に保存データをマスに入れる
+        for (let cellId in timetableData) {
+            let inputElement = document.getElementById(cellId);
+            if (inputElement) {
+                inputElement.value = timetableData[cellId];
+            }
+        }
+
+        // 入力時の自動保存 ＋ ドロップダウンの更新！
+        function saveTimetable(cellId) {
+            timetableData[cellId] = document.getElementById(cellId).value;
+            localStorage.setItem('myTimetable', JSON.stringify(timetableData));
+            updateSubjectDropdown(); // 時間割が変わったら選択肢も更新する
+        }
+
+        // ==========================================
+        // ★新規：ドロップダウンリストを更新する関数
+        // ==========================================
+        function updateSubjectDropdown() {
+            const select = document.getElementById('taskSubject');
+            select.innerHTML = '<option value="">教科を選択 (任意)</option>'; // 初期化
+            
+            let subjects = new Set(); // 重複を防ぐためのリスト（Set）
+
+            // 時間割データから文字が入っているものを集める
+            for (let key in timetableData) {
+                let val = timetableData[key].trim();
+                if (val !== "") {
+                    subjects.add(val);
+                }
+            }
+
+            // 集めた教科を選択肢として追加する
+            subjects.forEach(subject => {
+                let option = document.createElement('option');
+                option.value = subject;
+                option.textContent = subject;
+                select.appendChild(option);
+            });
+        }
+        
+        updateSubjectDropdown(); // アプリ起動時にも1回実行しておく
+
+        // ==========================================
+        // 3. 課題管理と連動
+        // ==========================================
+        renderTasks();
+
         function addTask() {
+            const subjectInput = document.getElementById('taskSubject'); // 追加
             const titleInput = document.getElementById('taskTitle');
             const dateInput = document.getElementById('taskDate');
             
@@ -113,73 +161,76 @@
                 return;
             }
 
-            // 新しい課題オブジェクトを作成
             const newTask = {
-                id: Date.now(), // 被らないIDとして現在の時間をミリ秒で指定
+                id: Date.now(),
+                subject: subjectInput.value, // 教科のデータも一緒に保存
                 title: titleInput.value,
                 date: dateInput.value
             };
 
-            tasks.push(newTask); // 配列に追加
-            saveToLocalStorage(); // ローカルストレージに保存
-            renderTasks();        // 画面を再描画
+            tasks.push(newTask);
+            localStorage.setItem('myTasks', JSON.stringify(tasks));
+            renderTasks();
             
-            // 入力欄を空にする
             titleInput.value = '';
             dateInput.value = '';
+            subjectInput.value = ''; // 教科の選択もリセット
         }
 
-        // --- 課題を完了（削除）する関数 ---
         function completeTask(id) {
-            // 指定されたID以外の課題だけを残す（＝指定された課題を消す）
             tasks = tasks.filter(task => task.id !== id);
-            saveToLocalStorage();
+            localStorage.setItem('myTasks', JSON.stringify(tasks));
             renderTasks();
         }
 
-        // --- データをローカルストレージに保存する関数 ---
-        function saveToLocalStorage() {
-            localStorage.setItem('myTasks', JSON.stringify(tasks));
-        }
-
-        // --- メモを自動保存する関数 ---
-        function saveMemo() {
-            const memoText = document.getElementById('memoArea').value;
-            localStorage.setItem('myMemo', memoText);
-        }
-
-        // --- 画面に課題データを表示する関数（連動の肝！） ---
         function renderTasks() {
             const taskListView = document.getElementById('taskListView');
             const calendarView = document.getElementById('calendarView');
             
-            // 一旦表示をクリア
             taskListView.innerHTML = '';
             calendarView.innerHTML = '';
 
             if (tasks.length === 0) {
-                taskListView.innerHTML = '<p style="color:gray;">未完了の課題はありません。素晴らしい！</p>';
+                taskListView.innerHTML = '<p style="color:gray;">未完了の課題はありません。✨</p>';
                 calendarView.innerHTML = '<p style="color:gray;">予定されている課題はありません。✨</p>';
                 return;
             }
 
-            // 課題データを1つずつ画面に組み立てていく
-            tasks.forEach(task => {
-                // 課題一覧側の見た目
+            const sortedTasks = tasks.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            sortedTasks.forEach(task => {
+                // 教科が選択されていれば、専用のバッジ（小さな枠）を作る
+                const subjectBadge = task.subject ? `<span class="subject-badge">${task.subject}</span>` : '';
+
+                // 課題一覧側
                 const taskItem = document.createElement('div');
                 taskItem.className = 'task-item';
                 taskItem.innerHTML = `
-                    <span><strong>${task.title}</strong> (締切: ${task.date})</span>
+                    <span>
+                        ${subjectBadge}<strong>${task.title}</strong><br>
+                        <small style="color:#718096;">締切: ${task.date}</small>
+                    </span>
                     <button class="btn-done" onclick="completeTask(${task.id})">完了</button>
                 `;
                 taskListView.appendChild(taskItem);
 
-                // カレンダー（連動）側の見た目（マークダウン風の絵文字デコ）
+                // カレンダー側
                 const calItem = document.createElement('div');
-                calItem.style.margin = "8px 0";
-                calItem.innerHTML = `🚨 <strong>${task.date}</strong> まで ➔ 「${task.title}」`;
+                calItem.style.margin = "10px 0";
+                calItem.style.padding = "10px";
+                calItem.style.backgroundColor = "#fff5f5";
+                calItem.style.borderLeft = "4px solid #f56565";
+                calItem.style.borderRadius = "4px";
+                calItem.innerHTML = `🚨 <strong>${task.date}</strong> ➔ ${subjectBadge} ${task.title}`;
                 calendarView.appendChild(calItem);
             });
+        }
+
+        // ==========================================
+        // 4. メモの自動保存
+        // ==========================================
+        function saveMemo() {
+            localStorage.setItem('myMemo', document.getElementById('memoArea').value);
         }
     </script>
 </body>
