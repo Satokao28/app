@@ -2,44 +2,184 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>🎨 モチベキャンパス (HTML版テスト)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎨 モチベキャンパス</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f5f7fa; }
-        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 10px; }
-        .btn { background-color: #4CAF50; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
-        .btn-complete { background-color: #ff9800; }
+        /* 全体のデザイン設定 */
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        h1 { text-align: center; color: #4a5568; margin-bottom: 25px; }
+        
+        /* 画面を2×2のグリッド（格子状）に綺麗に並べる */
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* 各パネル（カード）のデザイン */
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            min-height: 250px;
+        }
+        .card h2 { margin-top: 0; color: #4c51bf; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+        
+        /* 入力フォームやボタンのデザイン */
+        input, textarea, select {
+            width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box;
+        }
+        .btn {
+            background-color: #4c51bf; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold;
+        }
+        .btn:hover { background-color: #434190; }
+        
+        /* 課題リストのデザイン */
+        .task-item {
+            background: #f7fafc; padding: 10px; border-radius: 6px; margin-top: 8px; border-left: 4px solid #e53e3e;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .btn-done { background-color: #38a169; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        
+        /* カレンダー・時間割の簡易表示用 */
+        .schedule-zone { background: #edf2f7; padding: 10px; border-radius: 6px; min-height: 100px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>🎨 モチベキャンパス (HTMLテスト版)</h1>
-    <p>GitHubにプッシュしなくても、このファイルをブラウザで開くだけで確認できます！</p>
+    <h1>🎨 モチベキャンパス</h1>
 
-    <div class="card">
-        <h3>📝 課題の追加（テスト用見た目）</h3>
-        <input type="text" placeholder="課題名を入力" id="taskInput">
-        <button class="btn" onclick="addTask()">追加</button>
-    </div>
+    <div class="app-container">
 
-    <div class="card">
-        <h3>📅 連動カレンダー・一覧（テスト用）</h3>
-        <ul id="taskList">
-            <li>プログラミング基礎レポート (締切: 7/10) <button class="btn btn-complete" onclick="this.parentElement.remove()">完了にする</button></li>
-            <li>英語スピーチ準備 (締切: 7/15) <button class="btn btn-complete" onclick="this.parentElement.remove()">完了にする</button></li>
-        </ul>
+        <div class="card">
+            <h2>📅 大学の時間割</h2>
+            <p>※ここは今後、曜日ごとの表にしていきます！</p>
+            <div class="schedule-zone">
+                <strong>月曜日:</strong> 1限 英語 / 2限 プログラミング<br>
+                <strong>火曜日:</strong> 3限 経済学
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>👀 連動カレンダービュー</h2>
+            <p>提出が必要な課題がここに自動連動します。</p>
+            <div id="calendarView">
+                </div>
+        </div>
+
+        <div class="card">
+            <h2>📝 課題の追加・一覧</h2>
+            <div>
+                <input type="text" id="taskTitle" placeholder="課題名を入力 (例: レポート)">
+                <input type="date" id="taskDate">
+                <button class="btn" onclick="addTask()">課題を追加する</button>
+            </div>
+            <div id="taskListView">
+                </div>
+        </div>
+
+        <div class="card">
+            <h2>✏️ 自由なメモ</h2>
+            <textarea id="memoArea" rows="8" placeholder="忘れたくないこと、日記、モチベの上がる言葉など自由にどうぞ！" oninput="saveMemo()"></textarea>
+        </div>
+
     </div>
 
     <script>
-        // ボタンを押したら簡易的に課題を追加するJavaScript（動きのテスト）
+        // --- アプリ起動時にデータを読み込む ---
+        // ブラウザのLocalStorageからデータを取得（なければ空っぽの配列）
+        let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
+        
+        // 起動時に画面を描画する
+        renderTasks();
+        document.getElementById('memoArea').value = localStorage.getItem('myMemo') || '';
+
+        // --- 課題を追加する関数 ---
         function addTask() {
-            const input = document.getElementById('taskInput');
-            if (input.value) {
-                const ul = document.getElementById('taskList');
-                const li = document.createElement('li');
-                li.innerHTML = `${input.value} (締切: 本日) <button class="btn btn-complete" onclick="this.parentElement.remove()">完了にする</button>`;
-                ul.appendChild(li);
-                input.value = '';
+            const titleInput = document.getElementById('taskTitle');
+            const dateInput = document.getElementById('taskDate');
+            
+            if (!titleInput.value || !dateInput.value) {
+                alert('課題名と締切日を入力してください！');
+                return;
             }
+
+            // 新しい課題オブジェクトを作成
+            const newTask = {
+                id: Date.now(), // 被らないIDとして現在の時間をミリ秒で指定
+                title: titleInput.value,
+                date: dateInput.value
+            };
+
+            tasks.push(newTask); // 配列に追加
+            saveToLocalStorage(); // ローカルストレージに保存
+            renderTasks();        // 画面を再描画
+            
+            // 入力欄を空にする
+            titleInput.value = '';
+            dateInput.value = '';
+        }
+
+        // --- 課題を完了（削除）する関数 ---
+        function completeTask(id) {
+            // 指定されたID以外の課題だけを残す（＝指定された課題を消す）
+            tasks = tasks.filter(task => task.id !== id);
+            saveToLocalStorage();
+            renderTasks();
+        }
+
+        // --- データをローカルストレージに保存する関数 ---
+        function saveToLocalStorage() {
+            localStorage.setItem('myTasks', JSON.stringify(tasks));
+        }
+
+        // --- メモを自動保存する関数 ---
+        function saveMemo() {
+            const memoText = document.getElementById('memoArea').value;
+            localStorage.setItem('myMemo', memoText);
+        }
+
+        // --- 画面に課題データを表示する関数（連動の肝！） ---
+        function renderTasks() {
+            const taskListView = document.getElementById('taskListView');
+            const calendarView = document.getElementById('calendarView');
+            
+            // 一旦表示をクリア
+            taskListView.innerHTML = '';
+            calendarView.innerHTML = '';
+
+            if (tasks.length === 0) {
+                taskListView.innerHTML = '<p style="color:gray;">未完了の課題はありません。素晴らしい！</p>';
+                calendarView.innerHTML = '<p style="color:gray;">予定されている課題はありません。✨</p>';
+                return;
+            }
+
+            // 課題データを1つずつ画面に組み立てていく
+            tasks.forEach(task => {
+                // 課題一覧側の見た目
+                const taskItem = document.createElement('div');
+                taskItem.className = 'task-item';
+                taskItem.innerHTML = `
+                    <span><strong>${task.title}</strong> (締切: ${task.date})</span>
+                    <button class="btn-done" onclick="completeTask(${task.id})">完了</button>
+                `;
+                taskListView.appendChild(taskItem);
+
+                // カレンダー（連動）側の見た目（マークダウン風の絵文字デコ）
+                const calItem = document.createElement('div');
+                calItem.style.margin = "8px 0";
+                calItem.innerHTML = `🚨 <strong>${task.date}</strong> まで ➔ 「${task.title}」`;
+                calendarView.appendChild(calItem);
+            });
         }
     </script>
 </body>
