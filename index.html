@@ -22,7 +22,11 @@
         .card h2 { margin-top: 0; color: #4c51bf; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
         
         input[type="text"], input[type="date"], select { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; }
-        .input-group { display: flex; gap: 10px; align-items: center; }
+        
+        /* カラーピッカーの共通デザイン */
+        input[type="color"] { border: 1px solid #cbd5e0; border-radius: 6px; height: 38px; padding: 2px; box-sizing: border-box; cursor: pointer; background: white; }
+
+        .input-group { display: flex; gap: 10px; align-items: center; margin: 8px 0; }
         
         .btn { background-color: #4c51bf; color: white; border: none; padding: 10px 15px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.2s; }
         .btn:hover { background-color: #434190; }
@@ -37,12 +41,14 @@
         .btn-done { background-color: #38a169; }
         .subject-badge { background-color: #e2e8f0; color: #4a5568; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-right: 5px; font-weight: bold; }
         
-        /* 時間割 */
-        .timetable { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
-        .timetable th, .timetable td { border: 1px solid #cbd5e0; text-align: center; padding: 0; }
+        /* 時間割テーブルの調整 */
+        .timetable { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; background: white; }
+        .timetable th, .timetable td { border: 1px solid #cbd5e0; text-align: center; padding: 0; transition: background-color 0.2s; }
         .timetable th { background-color: #edf2f7; padding: 8px 0; font-size: 0.9em; color: #4a5568; }
-        .timetable td input { width: 100%; height: 100%; border: none; padding: 12px 4px; text-align: center; box-sizing: border-box; font-size: 0.9em; background: transparent; margin: 0; border-radius: 0; }
-        .timetable td input:focus { outline: 2px solid #4c51bf; background: #fff; position: relative; z-index: 1; }
+        
+        /* 時間割内の入力エリア */
+        .timetable td input[type="text"] { width: 100%; height: 100%; border: none; padding: 10px 4px 4px 4px; text-align: center; box-sizing: border-box; font-size: 0.9em; background: transparent; margin: 0; border-radius: 0; }
+        .timetable td input[type="text"]:focus { outline: none; background: rgba(255,255,255,0.8); }
         .timetable th:first-child { width: 30px; }
 
         /* カレンダー */
@@ -55,12 +61,11 @@
         .cal-day-empty { background-color: #f7fafc; }
         .cal-date-num { font-size: 0.85em; color: #718096; margin-bottom: 5px; }
         
-        /* カレンダー内のラベル（マウスを乗せるとクリックできることがわかるように変更） */
-        .cal-label { font-size: 0.75em; padding: 2px 4px; border-radius: 3px; margin-bottom: 3px; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; transition: 0.2s; }
-        .cal-label:hover { opacity: 0.7; } /* ホバー時に少し薄くする */
-        .cal-label-task { background-color: #fed7d7; color: #c53030; cursor: default; } /* 課題はリストから消すのでポインターなし */
+        /* カレンダー内の動的ラベル（文字をやや濃いグレーにして視認性確保） */
+        .cal-label { font-size: 0.75em; padding: 2px 4px; border-radius: 3px; margin-bottom: 3px; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; transition: 0.2s; color: #2d3748; }
+        .cal-label:hover { opacity: 0.7; }
+        .cal-label-task { cursor: default; }
         .cal-label-task:hover { opacity: 1; }
-        .cal-label-event { background-color: #c6f6d5; color: #22543d; } 
     </style>
 </head>
 <body>
@@ -103,11 +108,12 @@
                 <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
                     <h4 style="margin: 0 0 10px 0; color: #4a5568;">🎈 自分の予定を追加</h4>
                     <div class="input-group">
-                        <input type="text" id="eventTitle" placeholder="予定を入力 (例: サークル、バイト)" style="flex: 2;">
-                        <input type="date" id="eventDate" style="flex: 1;">
-                        <button class="btn" style="flex: 1;" onclick="addEvent()">予定追加</button>
+                        <input type="text" id="eventTitle" placeholder="予定を入力 (例: サークル、バイト)" style="flex: 3;">
+                        <input type="date" id="eventDate" style="flex: 2;">
+                        <input type="color" id="eventColor" value="#c6f6d5" style="flex: 0.5; width: 40px;" title="ラベルの色を選択">
+                        <button class="btn" style="flex: 1.5;" onclick="addEvent()">予定追加</button>
                     </div>
-                    <p style="font-size: 0.85em; color: gray; margin-top: 5px;">※予定を削除したい時は、カレンダー上の緑のラベルを直接クリックしてください。</p>
+                    <p style="font-size: 0.85em; color: gray; margin-top: 5px;">※予定を削除したい時は、カレンダー上のラベルを直接クリックしてください。</p>
                 </div>
             </div>
 
@@ -116,8 +122,13 @@
                 <div>
                     <select id="taskSubject"><option value="">教科を選択 (任意)</option></select>
                     <input type="text" id="taskTitle" placeholder="課題名を入力 (例: レポート)">
-                    <input type="date" id="taskDate">
-                    <button class="btn" onclick="addTask()">課題を追加する</button>
+                    
+                    <div class="input-group">
+                        <input type="date" id="taskDate" style="margin:0;">
+                        <input type="color" id="taskColor" value="#fed7d7" style="width: 50px; margin:0;" title="ラベルの色を選択">
+                    </div>
+                    
+                    <button class="btn" onclick="addTask()" style="margin-top: 8px;">課題を追加する</button>
                 </div>
                 <div id="taskListView"></div>
             </div>
@@ -141,7 +152,7 @@
         let timetableData = JSON.parse(localStorage.getItem('myTimetable')) || {};
         let currentDate = new Date();
 
-        // 1. 時間割
+        // 1. 時間割の生成（マスの中にテキスト用とカラー用のinputを組み込み）
         const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
         const periods = [1, 2, 3, 4, 5];
         const tbody = document.getElementById('timetableBody');
@@ -154,20 +165,46 @@
             days.forEach(day => {
                 let td = document.createElement('td');
                 let cellId = `tt-${day}-${period}`;
-                td.innerHTML = `<input type="text" id="${cellId}" placeholder=" " oninput="saveTimetable('${cellId}')">`;
+                // 上段に文字入力、下段に超薄型カラーピッカーを配置
+                td.innerHTML = `
+                    <div style="display: flex; flex-direction: column; height: 100%;">
+                        <input type="text" id="${cellId}" placeholder=" " oninput="saveTimetable('${cellId}')">
+                        <input type="color" id="${cellId}-color" value="#ffffff" oninput="saveTimetable('${cellId}')" style="width: 100%; height: 6px; border: none; padding: 0; background: transparent; border-radius: 0; border-top: 1px dashed #cbd5e0;">
+                    </div>
+                `;
                 row.appendChild(td);
             });
             tbody.appendChild(row);
         });
 
+        // 保存データの復元（過去の文字だけデータにも対応する互換処理付き）
         for (let cellId in timetableData) {
             let inputElement = document.getElementById(cellId);
-            if (inputElement) inputElement.value = timetableData[cellId];
+            let colorElement = document.getElementById(`${cellId}-color`);
+            let saved = timetableData[cellId];
+            
+            if (typeof saved === 'string') {
+                saved = { text: saved, color: "#ffffff" };
+            }
+            
+            if (inputElement && saved) {
+                inputElement.value = saved.text || "";
+                inputElement.parentElement.parentElement.style.backgroundColor = saved.color || "#ffffff";
+            }
+            if (colorElement && saved) {
+                colorElement.value = saved.color || "#ffffff";
+            }
         }
 
         function saveTimetable(cellId) {
-            timetableData[cellId] = document.getElementById(cellId).value;
+            let textVal = document.getElementById(cellId).value;
+            let colorVal = document.getElementById(`${cellId}-color`).value;
+            
+            timetableData[cellId] = { text: textVal, color: colorVal };
             localStorage.setItem('myTimetable', JSON.stringify(timetableData));
+            
+            // リアルタイムにマスの背景色を書き換える
+            document.getElementById(cellId).parentElement.parentElement.style.backgroundColor = colorVal;
             updateSubjectDropdown();
         }
 
@@ -176,14 +213,14 @@
             select.innerHTML = '<option value="">教科を選択 (任意)</option>'; 
             let subjects = new Set();
             for (let key in timetableData) {
-                let val = timetableData[key].trim();
+                let raw = timetableData[key];
+                // データ形式が変わったので、テキスト部分を抽出
+                let val = (typeof raw === 'object' ? raw.text : raw).trim();
                 if (val !== "") subjects.add(val);
             }
             subjects.forEach(subject => {
                 let option = document.createElement('option');
-                option.value = subject;
-                option.textContent = subject;
-                select.appendChild(option);
+                option.value = subject; option.textContent = subject; select.appendChild(option);
             });
         }
         updateSubjectDropdown();
@@ -199,55 +236,46 @@
             grid.innerHTML = '';
             
             ['日', '月', '火', '水', '木', '金', '土'].forEach(d => {
-                const head = document.createElement('div');
-                head.className = 'cal-head';
-                head.textContent = d;
-                grid.appendChild(head);
+                const head = document.createElement('div'); head.className = 'cal-head'; head.textContent = d; grid.appendChild(head);
             });
             
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             
             for (let i = 0; i < firstDay; i++) {
-                const empty = document.createElement('div');
-                empty.className = 'cal-day cal-day-empty';
-                grid.appendChild(empty);
+                const empty = document.createElement('div'); empty.className = 'cal-day cal-day-empty'; grid.appendChild(empty);
             }
             
             for (let i = 1; i <= daysInMonth; i++) {
-                const dayCell = document.createElement('div');
-                dayCell.className = 'cal-day';
+                const dayCell = document.createElement('div'); dayCell.className = 'cal-day';
                 
-                const num = document.createElement('div');
-                num.className = 'cal-date-num';
+                const num = document.createElement('div'); num.className = 'cal-date-num';
                 const today = new Date();
                 if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) {
                     num.style.color = 'white'; num.style.backgroundColor = '#3182ce'; num.style.borderRadius = '50%'; num.style.width = '20px'; num.style.textAlign = 'center';
                 }
-                num.textContent = i;
-                dayCell.appendChild(num);
+                num.textContent = i; dayCell.appendChild(num);
                 
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
                 
-                // 課題表示
+                // 課題表示（ユーザー指定のカラーを背景に反映）
                 tasks.filter(t => t.date === dateStr).forEach(t => {
                     const label = document.createElement('div');
                     label.className = 'cal-label cal-label-task';
+                    label.style.backgroundColor = t.color || '#fed7d7'; // カラーデータがなければデフォルト赤
                     label.textContent = `🚨 ${t.subject ? t.subject + ':' : ''} ${t.title}`;
                     label.title = t.title;
                     dayCell.appendChild(label);
                 });
 
-                // ★予定表示（クリックで削除可能に）
+                // 予定表示（ユーザー指定のカラーを背景に反映）
                 events.filter(e => e.date === dateStr).forEach(e => {
                     const label = document.createElement('div');
-                    label.className = 'cal-label cal-label-event';
+                    label.className = 'cal-label';
+                    label.style.backgroundColor = e.color || '#c6f6d5'; // カラーデータがなければデフォルト緑
                     label.textContent = `🎈 ${e.title}`;
                     label.title = "クリックで削除";
-                    // クリックイベントを追加
-                    label.onclick = function() {
-                        deleteEventFromCalendar(e.id, e.title);
-                    };
+                    label.onclick = function() { deleteEventFromCalendar(e.id, e.title); };
                     dayCell.appendChild(label);
                 });
                 
@@ -259,22 +287,20 @@
         function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); }
         function resetMonth() { currentDate = new Date(); renderCalendar(); }
 
-        // 3. 予定の追加と削除（リストを使わず直接操作）
+        // 3. 予定の管理（カラー対応）
         function addEvent() {
             const titleInput = document.getElementById('eventTitle');
             const dateInput = document.getElementById('eventDate');
+            const colorInput = document.getElementById('eventColor');
             if (!titleInput.value || !dateInput.value) return alert('予定と日付を入力してください！');
 
-            events.push({ id: Date.now(), title: titleInput.value, date: dateInput.value });
+            events.push({ id: Date.now(), title: titleInput.value, date: dateInput.value, color: colorInput.value });
             localStorage.setItem('myEvents', JSON.stringify(events));
             titleInput.value = ''; dateInput.value = '';
-            
             renderCalendar();
         }
 
-        // カレンダー上から直接削除するための関数
         function deleteEventFromCalendar(id, title) {
-            // 確認ダイアログを出す
             if (confirm(`予定「${title}」を削除しますか？`)) {
                 events = events.filter(e => e.id !== id);
                 localStorage.setItem('myEvents', JSON.stringify(events));
@@ -282,17 +308,17 @@
             }
         }
 
-        // 4. 課題
+        // 4. 課題の管理（カラー対応）
         function addTask() {
             const subject = document.getElementById('taskSubject').value;
             const title = document.getElementById('taskTitle').value;
             const date = document.getElementById('taskDate').value;
+            const color = document.getElementById('taskColor').value;
             if (!title || !date) return alert('課題名と締切日を入力してください！');
 
-            tasks.push({ id: Date.now(), subject, title, date });
+            tasks.push({ id: Date.now(), subject, title, date, color });
             localStorage.setItem('myTasks', JSON.stringify(tasks));
             document.getElementById('taskTitle').value = ''; document.getElementById('taskDate').value = '';
-            
             renderTasks(); renderCalendar();
         }
 
@@ -303,14 +329,15 @@
         }
 
         function renderTasks() {
-            const view = document.getElementById('taskListView');
-            view.innerHTML = '';
+            const view = document.getElementById('taskListView'); view.innerHTML = '';
             if (tasks.length === 0) return view.innerHTML = '<p style="color:gray;">未完了の課題はありません。✨</p>';
 
             tasks.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(t => {
                 const badge = t.subject ? `<span class="subject-badge">${t.subject}</span>` : '';
                 const item = document.createElement('div');
-                item.className = 'list-item list-item-task';
+                item.className = 'list-item';
+                // リストの左端の線の色も、選んだ色と連動させる
+                item.style.borderLeft = `4px solid ${t.color || '#e53e3e'}`;
                 item.innerHTML = `<span>${badge}<strong>${t.title}</strong><br><small>締切: ${t.date}</small></span> <button class="btn-delete btn-done" onclick="completeTask(${t.id})">完了</button>`;
                 view.appendChild(item);
             });
@@ -318,35 +345,26 @@
 
         // 5. メモ
         function addMemo() {
-            const input = document.getElementById('memoInput');
-            if (!input.value) return;
+            const input = document.getElementById('memoInput'); if (!input.value) return;
             memos.push({ id: Date.now(), text: input.value });
             localStorage.setItem('myMemos', JSON.stringify(memos));
             input.value = ''; renderMemos();
         }
-
         function deleteMemo(id) {
-            memos = memos.filter(m => m.id !== id);
-            localStorage.setItem('myMemos', JSON.stringify(memos));
-            renderMemos();
+            memos = memos.filter(m => m.id !== id); localStorage.setItem('myMemos', JSON.stringify(memos)); renderMemos();
         }
-
         function renderMemos() {
-            const view = document.getElementById('memoListView');
-            view.innerHTML = '';
+            const view = document.getElementById('memoListView'); view.innerHTML = '';
             if (memos.length === 0) return view.innerHTML = '<p style="color:gray;">メモはありません。</p>';
             memos.forEach(m => {
-                const item = document.createElement('div');
-                item.className = 'list-item list-item-memo';
+                const item = document.createElement('div'); item.className = 'list-item list-item-memo';
                 item.innerHTML = `<span>${m.text}</span> <button class="btn-delete" onclick="deleteMemo(${m.id})">削除</button>`;
                 view.appendChild(item);
             });
         }
 
         // 初期描画
-        renderCalendar();
-        renderTasks();
-        renderMemos();
+        renderCalendar(); renderTasks(); renderMemos();
     </script>
 </body>
 </html>
