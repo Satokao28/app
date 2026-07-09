@@ -24,7 +24,7 @@
         input[type="text"], input[type="date"], select { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; }
         .input-group { display: flex; gap: 10px; align-items: center; margin: 8px 0; }
         
-        /* 新規：10色パレット用のデザイン */
+        /* 10色パレット用のデザイン */
         .color-picker-container { display: flex; align-items: center; margin: 10px 0; background: #f7fafc; padding: 8px 12px; border-radius: 6px; border: 1px solid #edf2f7; }
         .color-palette { display: flex; gap: 8px; flex-wrap: wrap; }
         .palette-btn { width: 22px; height: 22px; border: 1px solid #cbd5e0; border-radius: 50%; cursor: pointer; transition: transform 0.1s; padding: 0; position: relative; }
@@ -43,15 +43,40 @@
         .btn-done { background-color: #38a169; }
         .subject-badge { background-color: #e2e8f0; color: #4a5568; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-right: 5px; font-weight: bold; }
         
-        /* 時間割 */
+        /* --------------------------
+           時間割（レイアウト大幅改善）
+           -------------------------- */
         .timetable { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; background: white; }
         .timetable th, .timetable td { border: 1px solid #cbd5e0; text-align: center; padding: 0; transition: background-color 0.2s; }
         .timetable th { background-color: #edf2f7; padding: 8px 0; font-size: 0.9em; color: #4a5568; }
-        .timetable td input[type="text"] { width: 100%; height: 100%; border: none; padding: 10px 4px 2px 4px; text-align: center; box-sizing: border-box; font-size: 0.9em; background: transparent; margin: 0; border-radius: 0; }
-        .timetable td input[type="text"]:focus { outline: none; background: rgba(255,255,255,0.8); }
         .timetable th:first-child { width: 30px; }
+        
+        /* マス目全体をコンテナ化 */
+        .timetable td > div { position: relative; width: 100%; height: 100%; min-height: 65px; }
+        
+        /* テキスト入力枠はマス目いっぱいに広げる */
+        .timetable td input[type="text"] { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            border: none; padding: 10px 5px; text-align: center; box-sizing: border-box; 
+            font-size: 0.95em; background: transparent; font-weight: bold; color: #2d3748; margin: 0; border-radius: 0;
+        }
+        .timetable td input[type="text"]:focus { outline: none; background: rgba(255,255,255,0.7); z-index: 1; }
 
-        /* カレンダー */
+        /* 極小のカラー選択ボタン（右下に配置） */
+        .cell-color-picker {
+            position: absolute; bottom: 4px; right: 4px;
+            width: 14px; height: 14px; border-radius: 50%;
+            border: 1px solid #a0aec0; background-color: #ffffff;
+            appearance: none; -webkit-appearance: none; cursor: pointer;
+            color: transparent; padding: 0; margin: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 5; transition: transform 0.1s;
+        }
+        .cell-color-picker:hover { transform: scale(1.3); }
+        .cell-color-picker option { color: #333; }
+
+        /* --------------------------
+           カレンダー
+           -------------------------- */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .calendar-header h3 { margin: 0; color: #2d3748; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background-color: #cbd5e0; border: 1px solid #cbd5e0; border-radius: 6px; overflow: hidden; }
@@ -151,7 +176,7 @@
     </div>
 
     <script>
-        // 厳選した、文字が見やすいパステル10色
+        // 厳選したパステル10色
         const paletteColors = [
             { code: '#fed7d7', name: 'パステル赤' },
             { code: '#feebc8', name: 'パステル橙' },
@@ -171,11 +196,10 @@
         let timetableData = JSON.parse(localStorage.getItem('myTimetable')) || {};
         let currentDate = new Date();
 
-        // 選択中の色を記憶する変数（初期値）
-        let selectedEventColor = '#c6f6d5'; // 予定は初期値「緑」
-        let selectedTaskColor = '#fed7d7';  // 課題は初期値「赤」
+        let selectedEventColor = '#c6f6d5'; 
+        let selectedTaskColor = '#fed7d7';  
 
-        // 1. 時間割の生成
+        // 1. 時間割の生成（小さな丸ボタンに改修）
         const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
         const periods = [1, 2, 3, 4, 5];
         const tbody = document.getElementById('timetableBody');
@@ -189,8 +213,8 @@
                 let td = document.createElement('td');
                 let cellId = `tt-${day}-${period}`;
                 
-                // 変更：時間割マスの下部セレクトボックスも10色＋白に統一
-                let selectHtml = `<select id="${cellId}-color" onchange="saveTimetable('${cellId}')" style="width: 100%; font-size: 0.75em; border: none; background: transparent; border-top: 1px dashed #cbd5e0; cursor: pointer; text-align: center; color: #718096; padding:2px 0;">`;
+                // セレクトボックスを「極小の丸い点」として配置
+                let selectHtml = `<select id="${cellId}-color" class="cell-color-picker" onchange="saveTimetable('${cellId}')" title="色を変更">`;
                 selectHtml += `<option value="#ffffff">白 (色なし)</option>`;
                 paletteColors.forEach(c => {
                     selectHtml += `<option value="${c.code}" style="background-color: ${c.code};">${c.name}</option>`;
@@ -198,7 +222,7 @@
                 selectHtml += `</select>`;
 
                 td.innerHTML = `
-                    <div style="display: flex; flex-direction: column; height: 100%;">
+                    <div>
                         <input type="text" id="${cellId}" placeholder=" " oninput="saveTimetable('${cellId}')">
                         ${selectHtml}
                     </div>
@@ -208,7 +232,7 @@
             tbody.appendChild(row);
         });
 
-        // データの復元（過去のカスタム色の互換性を保つ処理入り）
+        // データの復元
         for (let cellId in timetableData) {
             let inputElement = document.getElementById(cellId);
             let colorElement = document.getElementById(`${cellId}-color`);
@@ -222,7 +246,6 @@
             }
             if (colorElement && saved) {
                 let savedColor = saved.color || "#ffffff";
-                // もし過去の自由色データが残っていたら、選択肢に一時追加して壊れないようにする
                 let hasColor = Array.from(colorElement.options).some(opt => opt.value === savedColor);
                 if (!hasColor && savedColor !== "#ffffff") {
                     let opt = document.createElement('option');
@@ -230,15 +253,22 @@
                     colorElement.appendChild(opt);
                 }
                 colorElement.value = savedColor;
+                colorElement.style.backgroundColor = savedColor; // 丸ボタン自身の色も変更
             }
         }
 
         function saveTimetable(cellId) {
             let textVal = document.getElementById(cellId).value;
-            let colorVal = document.getElementById(`${cellId}-color`).value;
+            let colorSelect = document.getElementById(`${cellId}-color`);
+            let colorVal = colorSelect.value;
+            
             timetableData[cellId] = { text: textVal, color: colorVal };
             localStorage.setItem('myTimetable', JSON.stringify(timetableData));
+            
+            // マスの背景色と、極小ボタン自体の背景色を両方更新
             document.getElementById(cellId).parentElement.parentElement.style.backgroundColor = colorVal;
+            colorSelect.style.backgroundColor = colorVal;
+            
             updateSubjectDropdown();
         }
 
@@ -258,7 +288,6 @@
         }
         updateSubjectDropdown();
 
-        // ★新規：丸ボタンのカラーパレットを画面に作り出す関数
         function initPalette(targetId, defaultValue, callback) {
             const container = document.getElementById(targetId);
             container.innerHTML = '';
@@ -273,7 +302,7 @@
                 btn.onclick = () => {
                     container.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
-                    callback(c.code); // 選択された色を外の変数に伝える
+                    callback(c.code);
                 };
                 container.appendChild(btn);
             });
@@ -312,7 +341,6 @@
                 
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
                 
-                // 課題表示
                 tasks.filter(t => t.date === dateStr).forEach(t => {
                     const label = document.createElement('div');
                     label.className = 'cal-label cal-label-task';
@@ -322,7 +350,6 @@
                     dayCell.appendChild(label);
                 });
 
-                // 予定表示
                 events.filter(e => e.date === dateStr).forEach(e => {
                     const label = document.createElement('div');
                     label.className = 'cal-label';
@@ -347,7 +374,6 @@
             const dateInput = document.getElementById('eventDate');
             if (!titleInput.value || !dateInput.value) return alert('予定と日付を入力してください！');
 
-            // 記憶している selectedEventColor を保存
             events.push({ id: Date.now(), title: titleInput.value, date: dateInput.value, color: selectedEventColor });
             localStorage.setItem('myEvents', JSON.stringify(events));
             titleInput.value = ''; dateInput.value = '';
@@ -369,7 +395,6 @@
             const date = document.getElementById('taskDate').value;
             if (!title || !date) return alert('課題名と締切日を入力してください！');
 
-            // 記憶している selectedTaskColor を保存
             tasks.push({ id: Date.now(), subject, title, date, color: selectedTaskColor });
             localStorage.setItem('myTasks', JSON.stringify(tasks));
             document.getElementById('taskTitle').value = ''; document.getElementById('taskDate').value = '';
