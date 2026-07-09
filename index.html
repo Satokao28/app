@@ -79,8 +79,6 @@
 
         /* ドラッグ＆ドロップ・シール帳用スタイル */
         #calendar-drop-zone { position: relative; overflow: hidden; border-radius: 6px; }
-        
-        /* 🌟 新規：時間割のドロップゾーンスタイル */
         #timetable-drop-zone { position: relative; border-radius: 6px; }
         #timetablePlacedStampsContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
         
@@ -100,8 +98,8 @@
 
     <div class="sidebar">
         <h2>🎨 モチベキャンパス</h2>
-        <a id="nav-dashboard" class="active" onclick="switchView('dashboard')">🏠 ホーム (時間割など)</a>
-        <a id="nav-tasks" onclick="switchView('tasks')">📝 課題・メモ</a>
+        <a id="nav-dashboard" class="active" onclick="switchView('dashboard')">🏠 ホーム</a>
+        <a id="nav-tasks" onclick="switchView('tasks')">📝 課題</a>
         <a id="nav-shop" onclick="switchView('shop')">🪙 スタンプショップ</a>
     </div>
 
@@ -167,12 +165,21 @@
                     </div>
                 </div>
 
+                <div id="card-memos" class="card" style="grid-column: span 2;">
+                    <h2>✏️ メモ</h2>
+                    <div class="input-group">
+                        <input type="text" id="memoInput" placeholder="忘れたくないことなど">
+                        <button class="btn btn-small" style="padding: 8px 15px;" onclick="addMemo()">保存</button>
+                    </div>
+                    <div id="memoListView"></div>
+                </div>
+
             </div>
         </div>
 
         <div id="view-tasks" class="view-section">
             <div class="app-container">
-                <div id="card-tasks" class="card">
+                <div id="card-tasks" class="card" style="grid-column: span 2;">
                     <h2>📝 課題</h2>
                     <div>
                         <select id="taskSubject"><option value="">教科を選択 (任意)</option></select>
@@ -185,15 +192,6 @@
                         <button class="btn" onclick="addTask()">追加する</button>
                     </div>
                     <div id="taskListView"></div>
-                </div>
-
-                <div id="card-memos" class="card">
-                    <h2>✏️ メモ</h2>
-                    <div class="input-group">
-                        <input type="text" id="memoInput" placeholder="忘れたくないことなど">
-                        <button class="btn btn-small" style="padding: 8px 15px;" onclick="addMemo()">保存</button>
-                    </div>
-                    <div id="memoListView"></div>
                 </div>
             </div>
         </div>
@@ -229,7 +227,6 @@
         let timetableData = JSON.parse(localStorage.getItem('myTimetable')) || {};
         
         let calendarStamps = JSON.parse(localStorage.getItem('myCalendarStamps')) || [];
-        // 🌟 新規：時間割用のスタンプ保存配列
         let timetableStamps = JSON.parse(localStorage.getItem('myTimetableStamps')) || [];
         
         let currentDate = new Date();
@@ -244,11 +241,11 @@
             document.getElementById(`view-${viewId}`).classList.add('active');
             document.getElementById(`nav-${viewId}`).classList.add('active');
             
-            // 🌟 タイトルの出し分けを追加
+            // タイトルの出し分け
             if (viewId === 'dashboard') {
                 document.getElementById('pageTitle').textContent = 'ホーム';
             } else if (viewId === 'tasks') {
-                document.getElementById('pageTitle').textContent = '課題・メモ';
+                document.getElementById('pageTitle').textContent = '課題';
             } else if (viewId === 'shop') {
                 document.getElementById('pageTitle').textContent = 'スタンプショップ';
             }
@@ -272,7 +269,6 @@
             event.dataTransfer.dropEffect = 'move';
         }
 
-        // 🌟 どちらのエリアに落とされたか判定 (dropZoneType)
         function handleDrop(event, dropZoneType) {
             event.preventDefault();
             const dropZone = event.currentTarget;
@@ -285,8 +281,6 @@
 
             try {
                 const data = JSON.parse(event.dataTransfer.getData('text/plain'));
-                
-                // ターゲットを判別
                 const targetArray = dropZoneType === 'calendar' ? calendarStamps : timetableStamps;
                 const storageKey = dropZoneType === 'calendar' ? 'myCalendarStamps' : 'myTimetableStamps';
                 
@@ -296,7 +290,7 @@
                         stamp: data.value,
                         x: x,
                         y: y,
-                        scale: 1, // 🌟 追加：初期サイズ倍率
+                        scale: 1, 
                         monthYear: dropZoneType === 'calendar' ? currentMonthYear : 'all'
                     });
                 } else if (data.type === 'exist') {
@@ -315,15 +309,13 @@
             }
         }
 
-        // 🌟 サイズ変更（ホイールイベント）
         function handleWheel(event, id, dropZoneType) {
-            event.preventDefault(); // 画面のスクロールを防ぐ
+            event.preventDefault(); 
             const targetArray = dropZoneType === 'calendar' ? calendarStamps : timetableStamps;
             const storageKey = dropZoneType === 'calendar' ? 'myCalendarStamps' : 'myTimetableStamps';
             const stamp = targetArray.find(s => s.id === id);
             
             if (stamp) {
-                // 上で大きく、下で小さく (0.1ずつ変化、0.5〜3.0の範囲)
                 const scaleChange = event.deltaY < 0 ? 0.1 : -0.1;
                 stamp.scale = Math.max(0.5, Math.min(3.0, (stamp.scale || 1) + scaleChange));
                 
@@ -343,9 +335,7 @@
             renderPlacedStamps();
         }
 
-        // 🌟 統合されたスタンプ描画機能
         function renderPlacedStamps() {
-            // カレンダー用
             const calContainer = document.getElementById('placedStampsContainer');
             if (calContainer) {
                 calContainer.innerHTML = '';
@@ -356,7 +346,6 @@
                 });
             }
 
-            // 時間割用
             const ttContainer = document.getElementById('timetablePlacedStampsContainer');
             if (ttContainer) {
                 ttContainer.innerHTML = '';
@@ -372,12 +361,12 @@
             el.textContent = s.stamp;
             el.style.left = `${s.x}px`;
             el.style.top = `${s.y}px`;
-            el.style.transform = `scale(${s.scale || 1})`; // サイズ適用
+            el.style.transform = `scale(${s.scale || 1})`; 
             el.draggable = true;
             
             el.ondragstart = (e) => handleDragStart(e, 'exist', s.id);
             el.ondblclick = () => removePlacedStamp(s.id, dropZoneType);
-            el.onwheel = (e) => handleWheel(e, s.id, dropZoneType); // サイズ変更イベント
+            el.onwheel = (e) => handleWheel(e, s.id, dropZoneType); 
             
             el.title = "ダブルクリックで消去 / スクロールでサイズ変更";
             return el;
