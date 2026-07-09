@@ -118,8 +118,8 @@
                     <h2>📅 大学の時間割</h2>
                     
                     <div class="sticker-palette-container">
-                        <span class="sticker-palette-title">🎀 シール帳 (好きなスタンプをカレンダーや時間割にドラッグ！)</span>
-                        <div class="sticker-palette" id="stickerPalette">
+                        <span class="sticker-palette-title">🎀 シール帳 (時間割にドラッグ！)</span>
+                        <div class="sticker-palette sticker-palette-target">
                             <span style="font-size: 0.85em; color: gray;">ショップでスタンプを買うとここに並びます</span>
                         </div>
                         <p style="font-size: 0.75em; color: gray; margin: 5px 0 0 0;">※貼ったスタンプを消す時は「ダブルクリック」、サイズ変更はスタンプの上で「マウスホイール」</p>
@@ -137,6 +137,14 @@
                 <div id="card-calendar" class="card" style="grid-column: span 2;">
                     <h2>👀 月間カレンダー & 予定</h2>
                     
+                    <div class="sticker-palette-container">
+                        <span class="sticker-palette-title">🎀 シール帳 (カレンダーにドラッグ！)</span>
+                        <div class="sticker-palette sticker-palette-target">
+                            <span style="font-size: 0.85em; color: gray;">ショップでスタンプを買うとここに並びます</span>
+                        </div>
+                        <p style="font-size: 0.75em; color: gray; margin: 5px 0 0 0;">※貼ったスタンプを消す時は「ダブルクリック」、サイズ変更はスタンプの上で「マウスホイール」</p>
+                    </div>
+
                     <div class="calendar-header">
                         <button class="btn btn-small" onclick="prevMonth()">◀ 先月</button>
                         <h3 id="monthYearDisplay"></h3>
@@ -241,7 +249,6 @@
             document.getElementById(`view-${viewId}`).classList.add('active');
             document.getElementById(`nav-${viewId}`).classList.add('active');
             
-            // タイトルの出し分け
             if (viewId === 'dashboard') {
                 document.getElementById('pageTitle').textContent = 'ホーム';
             } else if (viewId === 'tasks') {
@@ -372,20 +379,23 @@
             return el;
         }
 
+        // 🌟 複数配置されたシール帳を同時に更新するよう変更
         function renderStickerPalette() {
-            const palette = document.getElementById('stickerPalette');
-            if (ownedStamps.length === 0) {
-                palette.innerHTML = '<span style="font-size: 0.85em; color: gray;">ショップでスタンプを買うとここに並びます</span>';
-                return;
-            }
-            palette.innerHTML = '';
-            ownedStamps.forEach(stamp => {
-                const el = document.createElement('div');
-                el.className = 'draggable-stamp';
-                el.textContent = stamp;
-                el.draggable = true;
-                el.ondragstart = (e) => handleDragStart(e, 'new', stamp);
-                palette.appendChild(el);
+            const palettes = document.querySelectorAll('.sticker-palette-target');
+            palettes.forEach(palette => {
+                if (ownedStamps.length === 0) {
+                    palette.innerHTML = '<span style="font-size: 0.85em; color: gray;">ショップでスタンプを買うとここに並びます</span>';
+                    return;
+                }
+                palette.innerHTML = '';
+                ownedStamps.forEach(stamp => {
+                    const el = document.createElement('div');
+                    el.className = 'draggable-stamp';
+                    el.textContent = stamp;
+                    el.draggable = true;
+                    el.ondragstart = (e) => handleDragStart(e, 'new', stamp);
+                    palette.appendChild(el);
+                });
             });
         }
 
