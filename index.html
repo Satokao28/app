@@ -9,20 +9,24 @@
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #f0f2f5; margin: 0; color: #333; display: flex; }
         
         /* サイドバー */
-        .sidebar { width: 220px; background-color: #2d3748; color: white; position: fixed; top: 0; left: 0; height: 100vh; padding: 20px; box-sizing: border-box; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
+        .sidebar { width: 220px; background-color: #2d3748; color: white; position: fixed; top: 0; left: 0; height: 100vh; padding: 20px; box-sizing: border-box; box-shadow: 2px 0 5px rgba(0,0,0,0.1); z-index: 100; }
         .sidebar h2 { margin-top: 0; font-size: 1.2em; border-bottom: 1px solid #4a5568; padding-bottom: 15px; margin-bottom: 20px; }
-        .sidebar a { display: block; color: #e2e8f0; text-decoration: none; padding: 12px; margin-bottom: 10px; border-radius: 6px; transition: background 0.2s; font-weight: bold; }
-        .sidebar a:hover { background-color: #4a5568; }
+        .sidebar a { display: block; color: #e2e8f0; text-decoration: none; padding: 12px; margin-bottom: 10px; border-radius: 6px; transition: background 0.2s; font-weight: bold; cursor: pointer; }
+        .sidebar a:hover, .sidebar a.active { background-color: #4a5568; }
 
-        /* ヘッダーエリア（ポイント表示用） */
+        /* ヘッダーエリア */
         .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
         .point-display { background: linear-gradient(135deg, #ecc94b, #d69e2e); color: #2d3748; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px; }
 
-        /* メインコンテンツ */
-        .main-content { margin-left: 220px; padding: 30px; width: calc(100% - 220px); box-sizing: border-box; }
+        /* メインコンテンツと画面切り替え */
+        .main-content { margin-left: 220px; padding: 30px; width: calc(100% - 220px); box-sizing: border-box; min-height: 100vh; }
+        .view-section { display: none; animation: fadeIn 0.3s; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         h1 { color: #4a5568; margin: 0; }
         .app-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1200px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); scroll-margin-top: 30px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); scroll-margin-top: 30px; position: relative; }
         .card h2 { margin-top: 0; color: #4c51bf; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
         
         input[type="text"], input[type="date"], select { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; }
@@ -41,201 +45,308 @@
         .btn-today { background-color: #3182ce; }
         
         .list-item { background: #f7fafc; padding: 10px; border-radius: 6px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .list-item-memo { border-left: 4px solid #ecc94b; }
         .btn-delete { background-color: #a0aec0; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.85em; }
         .btn-delete:hover { background-color: #718096; }
         .btn-done { background-color: #38a169; }
-        .subject-badge { background-color: #e2e8f0; color: #4a5568; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-right: 5px; font-weight: bold; }
         
-        /* スタンプショップのデザイン */
-        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 10px; }
-        .shop-item { border: 1px solid #cbd5e0; border-radius: 8px; padding: 10px; text-align: center; background: #f7fafc; position: relative; }
-        .shop-stamp { font-size: 1.5em; display: block; margin-bottom: 5px; }
-        .shop-price { font-size: 0.75em; color: #718096; font-weight: bold; display: block; }
-        .shop-btn { background: #4c51bf; color: white; border: none; border-radius: 4px; padding: 2px 6px; font-size: 0.75em; cursor: pointer; width: 100%; margin-top: 5px; }
+        /* ショップのデザイン */
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; margin-top: 20px; }
+        .shop-item { border: 1px solid #cbd5e0; border-radius: 12px; padding: 15px; text-align: center; background: #f7fafc; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.2s; }
+        .shop-item:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .shop-stamp { font-size: 2.5em; display: block; margin-bottom: 10px; }
+        .shop-price { font-size: 0.9em; color: #718096; font-weight: bold; display: block; margin-bottom: 10px; }
+        .shop-btn { background: #4c51bf; color: white; border: none; border-radius: 6px; padding: 6px 10px; font-size: 0.85em; cursor: pointer; width: 100%; font-weight: bold; }
         .shop-btn.owned { background: #cbd5e0; color: #718096; cursor: default; }
 
-        /* --------------------------
-           時間割（スタンプ対応）
-           -------------------------- */
+        /* 時間割 */
         .timetable { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; background: white; }
         .timetable th, .timetable td { border: 1px solid #cbd5e0; text-align: center; padding: 0; transition: background-color 0.2s; }
         .timetable th { background-color: #edf2f7; padding: 8px 0; font-size: 0.9em; color: #4a5568; }
         .timetable th:first-child { width: 30px; }
-        
         .timetable td > div { position: relative; width: 100%; height: 100%; min-height: 65px; }
-        
-        .timetable td input[type="text"] { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            border: none; padding: 10px 5px; text-align: center; box-sizing: border-box; 
-            font-size: 0.95em; background: transparent; font-weight: bold; color: #2d3748; margin: 0; border-radius: 0;
-        }
+        .timetable td input[type="text"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; padding: 10px 5px; text-align: center; box-sizing: border-box; font-size: 0.95em; background: transparent; font-weight: bold; color: #2d3748; margin: 0; border-radius: 0; }
         .timetable td input[type="text"]:focus { outline: none; background: rgba(255,255,255,0.7); z-index: 1; }
+        .cell-stamp-display { position: absolute; top: 4px; left: 4px; font-size: 1.1em; pointer-events: none; z-index: 2; }
+        .cell-color-picker { position: absolute; bottom: 4px; right: 4px; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #a0aec0; background-color: #ffffff; appearance: none; cursor: pointer; color: transparent; padding: 0; margin: 0; z-index: 5; }
 
-        /* 配置されたスタンプの見た目 */
-        .cell-stamp-display {
-            position: absolute; top: 4px; left: 4px; font-size: 1.1em; pointer-events: none; z-index: 2;
-        }
-
-        /* 極小のカラー＆スタンプ選択ボタン（右下に配置） */
-        .cell-color-picker {
-            position: absolute; bottom: 4px; right: 4px;
-            width: 14px; height: 14px; border-radius: 50%;
-            border: 1px solid #a0aec0; background-color: #ffffff;
-            appearance: none; -webkit-appearance: none; cursor: pointer;
-            color: transparent; padding: 0; margin: 0;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1); z-index: 5; transition: transform 0.1s;
-        }
-        .cell-color-picker:hover { transform: scale(1.3); }
-        .cell-color-picker option { color: #333; }
-
-        /* --------------------------
-           カレンダー
-           -------------------------- */
+        /* カレンダー */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .calendar-header h3 { margin: 0; color: #2d3748; }
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background-color: #cbd5e0; border: 1px solid #cbd5e0; border-radius: 6px; overflow: hidden; }
         .cal-head { background-color: #edf2f7; text-align: center; padding: 8px 0; font-weight: bold; font-size: 0.9em; color: #4a5568; }
-        .cal-head:first-child { color: #e53e3e; } .cal-head:last-child { color: #3182ce; }
         .cal-day { background-color: white; min-height: 90px; padding: 5px; box-sizing: border-box; }
-        .cal-day-empty { background-color: #f7fafc; }
         .cal-date-num { font-size: 0.85em; color: #718096; margin-bottom: 5px; }
+        .cal-label { font-size: 0.75em; padding: 2px 4px; border-radius: 3px; margin-bottom: 3px; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; color: #2d3748; }
+
+        /* ★ 新規：ドラッグ＆ドロップ用スタイル */
+        #calendar-drop-zone { position: relative; overflow: hidden; border-radius: 6px; }
         
-        .cal-label { font-size: 0.75em; padding: 2px 4px; border-radius: 3px; margin-bottom: 3px; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; transition: 0.2s; color: #2d3748; }
-        .cal-label:hover { opacity: 0.7; }
-        .cal-label-task { cursor: default; }
-        .cal-label-task:hover { opacity: 1; }
+        .sticker-palette-container { background: #fdf2f8; border: 2px dashed #f687b3; padding: 10px; border-radius: 8px; margin-bottom: 15px; }
+        .sticker-palette-title { font-size: 0.85em; color: #d53f8c; font-weight: bold; margin-bottom: 5px; display: block; }
+        .sticker-palette { display: flex; gap: 10px; flex-wrap: wrap; min-height: 35px; align-items: center; }
+        
+        .draggable-stamp { font-size: 1.8em; cursor: grab; user-select: none; transition: transform 0.1s; display: inline-block; }
+        .draggable-stamp:active { cursor: grabbing; transform: scale(1.2); }
+        
+        .placed-stamp { position: absolute; font-size: 1.8em; cursor: grab; user-select: none; z-index: 50; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
+        .placed-stamp:active { cursor: grabbing; }
+
     </style>
 </head>
 <body>
 
     <div class="sidebar">
         <h2>🎨 モチベキャンパス</h2>
-        <a href="#card-timetable">📅 時間割</a>
-        <a href="#card-shop">🪙 ショップ</a>
-        <a href="#card-calendar">👀 カレンダー</a>
-        <a href="#card-tasks">📝 課題</a>
-        <a href="#card-memos">✏️ メモ</a>
+        <a id="nav-dashboard" class="active" onclick="switchView('dashboard')">🏠 ホーム (時間割など)</a>
+        <a id="nav-shop" onclick="switchView('shop')">🪙 スタンプショップ</a>
     </div>
 
     <div class="main-content">
         <div class="header-bar">
-            <h1>ようこそ！キャンパスダッシュボードへ</h1>
+            <h1 id="pageTitle">ホーム</h1>
             <div class="point-display">
                 <span>🪙</span> <span id="userPointsDisplay">0</span> pt
             </div>
         </div>
 
-        <div class="app-container">
+        <div id="view-dashboard" class="view-section active">
+            <div class="app-container">
+                
+                <div id="card-timetable" class="card" style="grid-column: span 2;">
+                    <h2>📅 大学の時間割</h2>
+                    <table class="timetable">
+                        <thead><tr><th></th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th></tr></thead>
+                        <tbody id="timetableBody"></tbody>
+                    </table>
+                </div>
 
-            <div id="card-timetable" class="card" style="grid-column: span 2;">
-                <h2>📅 大学の時間割</h2>
-                <table class="timetable">
-                    <thead><tr><th></th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th></tr></thead>
-                    <tbody id="timetableBody"></tbody>
-                </table>
+                <div id="card-calendar" class="card" style="grid-column: span 2;">
+                    <h2>👀 月間カレンダー & 予定</h2>
+                    
+                    <div class="sticker-palette-container">
+                        <span class="sticker-palette-title">🎀 シール帳 (好きなスタンプをカレンダーにドラッグ！)</span>
+                        <div class="sticker-palette" id="stickerPalette">
+                            <span style="font-size: 0.85em; color: gray;">ショップでスタンプを買うとここに並びます</span>
+                        </div>
+                        <p style="font-size: 0.75em; color: gray; margin: 5px 0 0 0;">※貼ったスタンプを消す時は「ダブルクリック」してください。</p>
+                    </div>
+
+                    <div class="calendar-header">
+                        <button class="btn btn-small" onclick="prevMonth()">◀ 先月</button>
+                        <h3 id="monthYearDisplay"></h3>
+                        <div>
+                            <button class="btn btn-small btn-today" onclick="resetMonth()">今月</button>
+                            <button class="btn btn-small" onclick="nextMonth()">来月 ▶</button>
+                        </div>
+                    </div>
+                    
+                    <div id="calendar-drop-zone" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                        <div id="calendarGrid" class="calendar-grid"></div>
+                        <div id="placedStampsContainer"></div>
+                    </div>
+
+                    <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
+                        <h4 style="margin: 0 0 10px 0; color: #4a5568;">🎈 自分の予定を追加</h4>
+                        <div class="input-group">
+                            <input type="text" id="eventTitle" placeholder="予定を入力 (例: サークル)" style="flex: 2;">
+                            <input type="date" id="eventDate" style="flex: 1;">
+                            <button class="btn" style="flex: 1;" onclick="addEvent()">予定追加</button>
+                        </div>
+                        <div class="color-picker-container">
+                            <span style="font-size: 0.85em; font-weight: bold;">ラベルの色:</span>
+                            <div class="color-palette" id="eventColorPalette"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="card-tasks" class="card">
+                    <h2>📝 課題</h2>
+                    <div>
+                        <select id="taskSubject"><option value="">教科を選択 (任意)</option></select>
+                        <input type="text" id="taskTitle" placeholder="課題名を入力">
+                        <input type="date" id="taskDate">
+                        <div class="color-picker-container">
+                            <span style="font-size: 0.85em; font-weight: bold;">ラベルの色:</span>
+                            <div class="color-palette" id="taskColorPalette"></div>
+                        </div>
+                        <button class="btn" onclick="addTask()">追加する</button>
+                    </div>
+                    <div id="taskListView"></div>
+                </div>
+
+                <div id="card-memos" class="card">
+                    <h2>✏️ メモ</h2>
+                    <div class="input-group">
+                        <input type="text" id="memoInput" placeholder="忘れたくないことなど">
+                        <button class="btn btn-small" style="padding: 8px 15px;" onclick="addMemo()">保存</button>
+                    </div>
+                    <div id="memoListView"></div>
+                </div>
+
             </div>
-
-            <div id="card-shop" class="card" style="grid-column: span 2;">
-                <h2>🪙 モチベスタンプショップ (1つ 30pt)</h2>
-                <p style="font-size: 0.85em; color: #718096; margin: 0 0 10px 0;">期限内に課題を完了させると 10pt ゲット！貯まったポイントでスタンプを解放して、時間割をデコろう！</p>
+        </div>
+        <div id="view-shop" class="view-section">
+            <div class="card" style="max-width: 800px; margin: 0 auto;">
+                <h2>🪙 モチベスタンプショップ</h2>
+                <p style="color: #718096; margin-bottom: 20px;">
+                    課題を期限内に完了させて <strong>10pt</strong> をゲットしよう！<br>
+                    スタンプを購入すると、時間割のマスの中や、カレンダーの上に自由に貼れるようになります。
+                </p>
                 <div class="shop-grid" id="shopGrid"></div>
             </div>
-
-            <div id="card-calendar" class="card" style="grid-column: span 2;">
-                <h2>👀 月間カレンダー & 予定</h2>
-                
-                <div class="calendar-header">
-                    <button class="btn btn-small" onclick="prevMonth()">◀ 先月</button>
-                    <h3 id="monthYearDisplay"></h3>
-                    <div>
-                        <button class="btn btn-small btn-today" onclick="resetMonth()">今月</button>
-                        <button class="btn btn-small" onclick="nextMonth()">来月 ▶</button>
-                    </div>
-                </div>
-                
-                <div id="calendarGrid" class="calendar-grid"></div>
-
-                <div style="margin-top: 20px; border-top: 1px solid #e2e8f0; padding-top: 15px;">
-                    <h4 style="margin: 0 0 10px 0; color: #4a5568;">🎈 自分の予定を追加</h4>
-                    <div class="input-group">
-                        <input type="text" id="eventTitle" placeholder="予定を入力 (例: サークル、バイト)" style="flex: 2;">
-                        <input type="date" id="eventDate" style="flex: 1;">
-                        <button class="btn" style="flex: 1;" onclick="addEvent()">予定追加</button>
-                    </div>
-                    
-                    <div class="color-picker-container">
-                        <span style="font-size: 0.85em; color: #718096; margin-right: 12px; font-weight: bold;">ラベルの色:</span>
-                        <div class="color-palette" id="eventColorPalette"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="card-tasks" class="card">
-                <h2>📝 課題の追加・一覧</h2>
-                <div>
-                    <select id="taskSubject"><option value="">教科を選択 (任意)</option></select>
-                    <input type="text" id="taskTitle" placeholder="課題名を入力 (例: レポート)">
-                    <input type="date" id="taskDate">
-                    
-                    <div class="color-picker-container">
-                        <span style="font-size: 0.85em; color: #718096; margin-right: 12px; font-weight: bold;">ラベルの色:</span>
-                        <div class="color-palette" id="taskColorPalette"></div>
-                    </div>
-                    
-                    <button class="btn" onclick="addTask()">課題を追加する</button>
-                </div>
-                <div id="taskListView"></div>
-            </div>
-
-            <div id="card-memos" class="card">
-                <h2>✏️ メモ一覧</h2>
-                <div class="input-group">
-                    <input type="text" id="memoInput" placeholder="忘れたくないこと、アイデアなど">
-                    <button class="btn btn-small" style="padding: 8px 15px;" onclick="addMemo()">保存</button>
-                </div>
-                <div id="memoListView"></div>
-            </div>
-
         </div>
-    </div>
+        </div>
 
     <script>
         const paletteColors = [
-            { code: '#fed7d7', name: 'パステル赤' },
-            { code: '#feebc8', name: 'パステル橙' },
-            { code: '#fef3c7', name: 'パステル黄' },
-            { code: '#d1fae5', name: 'ミント' },
-            { code: '#c6f6d5', name: 'パステル緑' },
-            { code: '#bee3f8', name: 'パステル水色' },
-            { code: '#e0e7ff', name: 'パステル青' },
-            { code: '#e9d8fd', name: 'パステル紫' },
-            { code: '#fce7f3', name: 'パステルピンク' },
-            { code: '#f3f4f6', name: 'パステルグレー' }
+            { code: '#fed7d7', name: 'パステル赤' }, { code: '#feebc8', name: 'パステル橙' },
+            { code: '#fef3c7', name: 'パステル黄' }, { code: '#d1fae5', name: 'ミント' },
+            { code: '#c6f6d5', name: 'パステル緑' }, { code: '#bee3f8', name: 'パステル水色' },
+            { code: '#e0e7ff', name: 'パステル青' }, { code: '#e9d8fd', name: 'パステル紫' },
+            { code: '#fce7f3', name: 'パステルピンク' }, { code: '#f3f4f6', name: 'パステルグレー' }
         ];
 
-        // 購入可能なスタンプの定義
-        const availableStamps = ['⭐', '🔥', '💖', '💯', '☕', '💡', '🐾', '🎮', '🎬', '✈️'];
+        const availableStamps = ['⭐', '🔥', '💖', '💯', '☕', '💡', '🐾', '🎮', '🎬', '✈️', '🌸', '🎂', '🍔', '👻', '💤'];
 
-        // 各種データの初期化
         let userPoints = parseInt(localStorage.getItem('userPoints')) || 0;
-        let ownedStamps = JSON.parse(localStorage.getItem('ownedStamps')) || []; // 購入済みのスタンプリスト
+        let ownedStamps = JSON.parse(localStorage.getItem('ownedStamps')) || []; 
         let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
         let events = JSON.parse(localStorage.getItem('myEvents')) || [];
         let memos = JSON.parse(localStorage.getItem('myMemos')) || [];
         let timetableData = JSON.parse(localStorage.getItem('myTimetable')) || {};
+        
+        // ★新規：カレンダー上に配置されたスタンプの座標データ { id, stamp, x, y, monthYear }
+        let calendarStamps = JSON.parse(localStorage.getItem('myCalendarStamps')) || [];
+        
         let currentDate = new Date();
-
         let selectedEventColor = '#c6f6d5'; 
         let selectedTaskColor = '#fed7d7';  
 
-        // ポイント表示の更新
+        // ===== 画面切り替えロジック =====
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            document.getElementById(`nav-${viewId}`).classList.add('active');
+            
+            document.getElementById('pageTitle').textContent = viewId === 'dashboard' ? 'ホーム' : 'スタンプショップ';
+            
+            if (viewId === 'shop') renderShop();
+        }
+
         function updatePointsDisplay() {
             document.getElementById('userPointsDisplay').textContent = userPoints;
             localStorage.setItem('userPoints', userPoints);
         }
 
-        // 1. 時間割の生成（スタンプの表示機能を追加）
+        // ===== ドラッグ＆ドロップロジック =====
+        function handleDragStart(event, type, value) {
+            // type: 'new' (パレットから新規) または 'exist' (配置済みを移動)
+            // value: 新規ならスタンプの文字、既存ならそのスタンプのID
+            event.dataTransfer.setData('text/plain', JSON.stringify({ type, value }));
+            event.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault(); // ドロップを許可する
+            event.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            const dropZone = document.getElementById('calendar-drop-zone');
+            const rect = dropZone.getBoundingClientRect();
+            
+            // マウスの座標から、ドロップエリア左上を(0,0)とした相対座標を計算
+            // スタンプの中心がマウスの先に来るように少しズラす (約15px)
+            const x = event.clientX - rect.left - 15;
+            const y = event.clientY - rect.top - 15;
+
+            // 今表示している月を記録（月を切り替えた時に出し分けるため）
+            const currentMonthYear = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
+
+            try {
+                const data = JSON.parse(event.dataTransfer.getData('text/plain'));
+                
+                if (data.type === 'new') {
+                    // 新しいスタンプをカレンダーに追加
+                    calendarStamps.push({
+                        id: Date.now(),
+                        stamp: data.value,
+                        x: x,
+                        y: y,
+                        monthYear: currentMonthYear
+                    });
+                } else if (data.type === 'exist') {
+                    // 既にカレンダーにあるスタンプを移動
+                    const stampId = data.value;
+                    const targetStamp = calendarStamps.find(s => s.id === stampId);
+                    if (targetStamp) {
+                        targetStamp.x = x;
+                        targetStamp.y = y;
+                    }
+                }
+                
+                localStorage.setItem('myCalendarStamps', JSON.stringify(calendarStamps));
+                renderPlacedStamps();
+            } catch (e) {
+                console.error("ドロップデータのパースに失敗しました", e);
+            }
+        }
+
+        function removePlacedStamp(id) {
+            calendarStamps = calendarStamps.filter(s => s.id !== id);
+            localStorage.setItem('myCalendarStamps', JSON.stringify(calendarStamps));
+            renderPlacedStamps();
+        }
+
+        function renderPlacedStamps() {
+            const container = document.getElementById('placedStampsContainer');
+            container.innerHTML = '';
+            
+            const currentMonthYear = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
+
+            calendarStamps.forEach(s => {
+                // 現在表示している月以外のスタンプは非表示
+                if (s.monthYear && s.monthYear !== currentMonthYear) return;
+
+                const el = document.createElement('div');
+                el.className = 'placed-stamp';
+                el.textContent = s.stamp;
+                el.style.left = `${s.x}px`;
+                el.style.top = `${s.y}px`;
+                el.draggable = true;
+                
+                // 動かすためのイベント
+                el.ondragstart = (e) => handleDragStart(e, 'exist', s.id);
+                // ダブルクリックで削除
+                el.ondblclick = () => removePlacedStamp(s.id);
+                // スマホなどタップ向けに、一応titleを付けておく
+                el.title = "ダブルクリックで剥がす";
+
+                container.appendChild(el);
+            });
+        }
+
+        function renderStickerPalette() {
+            const palette = document.getElementById('stickerPalette');
+            if (ownedStamps.length === 0) {
+                palette.innerHTML = '<span style="font-size: 0.85em; color: gray;">ショップでスタンプを買うとここに並びます</span>';
+                return;
+            }
+            palette.innerHTML = '';
+            ownedStamps.forEach(stamp => {
+                const el = document.createElement('div');
+                el.className = 'draggable-stamp';
+                el.textContent = stamp;
+                el.draggable = true;
+                el.ondragstart = (e) => handleDragStart(e, 'new', stamp);
+                palette.appendChild(el);
+            });
+        }
+
+
+        // ===== 時間割 =====
         const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
         const periods = [1, 2, 3, 4, 5];
         const tbody = document.getElementById('timetableBody');
@@ -251,56 +362,37 @@
                     let td = document.createElement('td');
                     let cellId = `tt-${day}-${period}`;
                     
-                    // セレクトボックスの選択肢構築
                     let selectHtml = `<select id="${cellId}-color" class="cell-color-picker" onchange="saveTimetable('${cellId}')" title="色・スタンプの変更">`;
-                    selectHtml += `<optgroup label="背景カラー">`;
-                    selectHtml += `<option value="#ffffff">白 (色なし)</option>`;
-                    paletteColors.forEach(c => {
-                        selectHtml += `<option value="${c.code}">${c.name}</option>`;
-                    });
-                    selectHtml += `</optgroup>`;
-                    
-                    // 解放済みのスタンプを選択肢に追加
-                    selectHtml += `<optgroup label="スタンプ (左上に配置)">`;
+                    selectHtml += `<optgroup label="背景カラー"><option value="#ffffff">白 (色なし)</option>`;
+                    paletteColors.forEach(c => selectHtml += `<option value="${c.code}">${c.name}</option>`);
+                    selectHtml += `</optgroup><optgroup label="マス内のスタンプ">`;
                     selectHtml += `<option value="none">スタンプなし</option>`;
-                    ownedStamps.forEach(stamp => {
-                        selectHtml += `<option value="stamp-${stamp}">スタンプ: ${stamp}</option>`;
-                    });
-                    selectHtml += `</optgroup>`;
-                    selectHtml += `</select>`;
+                    ownedStamps.forEach(stamp => selectHtml += `<option value="stamp-${stamp}">スタンプ: ${stamp}</option>`);
+                    selectHtml += `</optgroup></select>`;
 
-                    td.innerHTML = `
-                        <div>
-                            <span id="${cellId}-stampDisplay" class="cell-stamp-display"></span>
-                            <input type="text" id="${cellId}" placeholder=" " oninput="saveTimetable('${cellId}')">
-                            ${selectHtml}
-                        </div>
-                    `;
+                    td.innerHTML = `<div><span id="${cellId}-stampDisplay" class="cell-stamp-display"></span><input type="text" id="${cellId}" placeholder=" " oninput="saveTimetable('${cellId}')">${selectHtml}</div>`;
                     row.appendChild(td);
                 });
                 tbody.appendChild(row);
             });
 
-            // データの復元
             for (let cellId in timetableData) {
-                let inputElement = document.getElementById(cellId);
-                let colorElement = document.getElementById(`${cellId}-color`);
-                let stampDisplay = document.getElementById(`${cellId}-stampDisplay`);
                 let saved = timetableData[cellId];
-                
-                if (typeof saved === 'string') { saved = { text: saved, color: "#ffffff", stamp: "none" }; }
+                if (typeof saved === 'string') saved = { text: saved, color: "#ffffff", stamp: "none" };
                 if (!saved.stamp) saved.stamp = "none";
                 
-                if (inputElement && saved) {
-                    inputElement.value = saved.text || "";
-                    inputElement.parentElement.parentElement.style.backgroundColor = saved.color || "#ffffff";
+                let inputEl = document.getElementById(cellId);
+                let colorEl = document.getElementById(`${cellId}-color`);
+                let stampDisplay = document.getElementById(`${cellId}-stampDisplay`);
+                
+                if (inputEl) {
+                    inputEl.value = saved.text || "";
+                    inputEl.parentElement.parentElement.style.backgroundColor = saved.color || "#ffffff";
                 }
-                if (stampDisplay && saved.stamp !== "none") {
-                    stampDisplay.textContent = saved.stamp;
-                }
-                if (colorElement && saved) {
-                    colorElement.value = saved.color || "#ffffff";
-                    colorElement.style.backgroundColor = saved.color || "#ffffff";
+                if (stampDisplay && saved.stamp !== "none") stampDisplay.textContent = saved.stamp;
+                if (colorEl) {
+                    colorEl.value = saved.color || "#ffffff";
+                    colorEl.style.backgroundColor = saved.color || "#ffffff";
                 }
             }
         }
@@ -310,16 +402,10 @@
             let colorSelect = document.getElementById(`${cellId}-color`);
             let selectedVal = colorSelect.value;
             
-            // 現在の保存データを取得、なければ初期化
-            if (!timetableData[cellId]) {
-                timetableData[cellId] = { text: "", color: "#ffffff", stamp: "none" };
-            }
+            if (!timetableData[cellId]) timetableData[cellId] = { text: "", color: "#ffffff", stamp: "none" };
             
-            // 選択されたのがスタンプかカラーかで処理を分ける
             if (selectedVal.startsWith('stamp-')) {
-                let stampChar = selectedVal.replace('stamp-', '');
-                timetableData[cellId].stamp = stampChar;
-                // セレクトボックスの選択状態を「カラー」側に戻しておく（見栄えのため）
+                timetableData[cellId].stamp = selectedVal.replace('stamp-', '');
                 colorSelect.value = timetableData[cellId].color;
             } else if (selectedVal === 'none') {
                 timetableData[cellId].stamp = "none";
@@ -332,14 +418,12 @@
             timetableData[cellId].text = textVal;
             localStorage.setItem('myTimetable', JSON.stringify(timetableData));
             
-            // 画面表示の更新
             document.getElementById(cellId).parentElement.parentElement.style.backgroundColor = timetableData[cellId].color;
             document.getElementById(`${cellId}-stampDisplay`).textContent = timetableData[cellId].stamp === "none" ? "" : timetableData[cellId].stamp;
-            
             updateSubjectDropdown();
         }
 
-        // 1.8 ショップの描画
+        // ===== ショップ =====
         function renderShop() {
             const shopGrid = document.getElementById('shopGrid');
             shopGrid.innerHTML = '';
@@ -348,12 +432,11 @@
                 const isOwned = ownedStamps.includes(stamp);
                 const item = document.createElement('div');
                 item.className = 'shop-item';
-                
                 item.innerHTML = `
                     <span class="shop-stamp">${stamp}</span>
                     <span class="shop-price">${isOwned ? '解放済' : '30 pt'}</span>
                     <button class="shop-btn ${isOwned ? 'owned' : ''}" ${isOwned ? 'disabled' : ''} onclick="buyStamp('${stamp}')">
-                        ${isOwned ? '利用可能' : '購入する'}
+                        ${isOwned ? '使えるよ！' : '購入する'}
                     </button>
                 `;
                 shopGrid.appendChild(item);
@@ -361,20 +444,20 @@
         }
 
         function buyStamp(stamp) {
-            if (userPoints < 30) {
-                alert('ポイントが足りません！課題を終わらせてポイントを貯めましょう。💪');
-                return;
-            }
+            if (userPoints < 30) return alert('ポイントが足りません！課題を終わらせてポイントを貯めましょう。💪');
             if (confirm(`30pt を消費してスタンプ「${stamp}」を解放しますか？`)) {
                 userPoints -= 30;
                 ownedStamps.push(stamp);
                 localStorage.setItem('ownedStamps', JSON.stringify(ownedStamps));
                 updatePointsDisplay();
                 renderShop();
-                renderTimetable(); // 時間割のドロップダウンの選択肢を増やすために再描画
+                renderStickerPalette(); // シール帳を更新
+                renderTimetable();      // 時間割の選択肢を更新
+                alert('スタンプを解放しました！ホーム画面のシール帳から使ってみてね！');
             }
         }
 
+        // ===== その他（カレンダー・課題・メモ） =====
         function updateSubjectDropdown() {
             const select = document.getElementById('taskSubject');
             if(!select) return;
@@ -385,9 +468,8 @@
                 let val = (typeof raw === 'object' ? raw.text : raw).trim();
                 if (val !== "") subjects.add(val);
             }
-            subjects.forEach(subject => {
-                let option = document.createElement('option');
-                option.value = subject; option.textContent = subject; select.appendChild(option);
+            subjects.forEach(sub => {
+                let opt = document.createElement('option'); opt.value = sub; opt.textContent = sub; select.appendChild(opt);
             });
         }
 
@@ -396,22 +478,16 @@
             container.innerHTML = '';
             paletteColors.forEach(c => {
                 const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'palette-btn';
-                btn.style.backgroundColor = c.code;
-                btn.title = c.name;
+                btn.type = 'button'; btn.className = 'palette-btn'; btn.style.backgroundColor = c.code; btn.title = c.name;
                 if (c.code === defaultValue) btn.classList.add('active');
-                
                 btn.onclick = () => {
                     container.querySelectorAll('.palette-btn').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    callback(c.code);
+                    btn.classList.add('active'); callback(c.code);
                 };
                 container.appendChild(btn);
             });
         }
 
-        // 2. カレンダー
         function renderCalendar() {
             const grid = document.getElementById('calendarGrid');
             const display = document.getElementById('monthYearDisplay');
@@ -429,12 +505,11 @@
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             
             for (let i = 0; i < firstDay; i++) {
-                const empty = document.createElement('div'); empty.className = 'cal-day cal-day-empty'; grid.appendChild(empty);
+                const empty = document.createElement('div'); empty.className = 'cal-day'; empty.style.backgroundColor = '#f7fafc'; grid.appendChild(empty);
             }
             
             for (let i = 1; i <= daysInMonth; i++) {
                 const dayCell = document.createElement('div'); dayCell.className = 'cal-day';
-                
                 const num = document.createElement('div'); num.className = 'cal-date-num';
                 const today = new Date();
                 if (year === today.getFullYear() && month === today.getMonth() && i === today.getDate()) {
@@ -445,131 +520,82 @@
                 const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
                 
                 tasks.filter(t => t.date === dateStr).forEach(t => {
-                    const label = document.createElement('div');
-                    label.className = 'cal-label cal-label-task';
-                    label.style.backgroundColor = t.color || '#fed7d7';
-                    label.textContent = `🚨 ${t.subject ? t.subject + ':' : ''} ${t.title}`;
-                    label.title = t.title;
-                    dayCell.appendChild(label);
+                    const label = document.createElement('div'); label.className = 'cal-label'; label.style.backgroundColor = t.color || '#fed7d7';
+                    label.textContent = `🚨 ${t.subject ? t.subject + ':' : ''} ${t.title}`; label.title = t.title; dayCell.appendChild(label);
                 });
-
                 events.filter(e => e.date === dateStr).forEach(e => {
-                    const label = document.createElement('div');
-                    label.className = 'cal-label';
-                    label.style.backgroundColor = e.color || '#c6f6d5';
-                    label.textContent = `🎈 ${e.title}`;
-                    label.title = "クリックで削除";
-                    label.onclick = function() { deleteEventFromCalendar(e.id, e.title); };
-                    dayCell.appendChild(label);
+                    const label = document.createElement('div'); label.className = 'cal-label'; label.style.backgroundColor = e.color || '#c6f6d5';
+                    label.textContent = `🎈 ${e.title}`; label.title = "クリックで削除";
+                    label.onclick = function() { deleteEventFromCalendar(e.id, e.title); }; dayCell.appendChild(label);
                 });
-                
                 grid.appendChild(dayCell);
             }
+            // カレンダー描画時に、その月用のスタンプも再描画する
+            renderPlacedStamps();
         }
 
         function prevMonth() { currentDate.setMonth(currentDate.getMonth() - 1); renderCalendar(); }
         function nextMonth() { currentDate.setMonth(currentDate.getMonth() + 1); renderCalendar(); }
         function resetMonth() { currentDate = new Date(); renderCalendar(); }
 
-        // 3. 予定の管理
         function addEvent() {
-            const titleInput = document.getElementById('eventTitle');
-            const dateInput = document.getElementById('eventDate');
-            if (!titleInput.value || !dateInput.value) return alert('予定と日付を入力してください！');
-
-            events.push({ id: Date.now(), title: titleInput.value, date: dateInput.value, color: selectedEventColor });
-            localStorage.setItem('myEvents', JSON.stringify(events));
-            titleInput.value = ''; dateInput.value = '';
-            renderCalendar();
+            const t = document.getElementById('eventTitle').value, d = document.getElementById('eventDate').value;
+            if (!t || !d) return alert('入力してください！');
+            events.push({ id: Date.now(), title: t, date: d, color: selectedEventColor });
+            localStorage.setItem('myEvents', JSON.stringify(events)); document.getElementById('eventTitle').value = ''; document.getElementById('eventDate').value = ''; renderCalendar();
         }
-
         function deleteEventFromCalendar(id, title) {
-            if (confirm(`予定「${title}」を削除しますか？`)) {
-                events = events.filter(e => e.id !== id);
-                localStorage.setItem('myEvents', JSON.stringify(events));
-                renderCalendar();
-            }
+            if (confirm(`削除しますか？`)) { events = events.filter(e => e.id !== id); localStorage.setItem('myEvents', JSON.stringify(events)); renderCalendar(); }
         }
 
-        // 4. 課題の管理 (ポイント獲得ロジック追加)
         function addTask() {
-            const subject = document.getElementById('taskSubject').value;
-            const title = document.getElementById('taskTitle').value;
-            const date = document.getElementById('taskDate').value;
-            if (!title || !date) return alert('課題名と締切日を入力してください！');
-
-            tasks.push({ id: Date.now(), subject, title, date, color: selectedTaskColor });
-            localStorage.setItem('myTasks', JSON.stringify(tasks));
-            document.getElementById('taskTitle').value = ''; document.getElementById('taskDate').value = '';
-            renderTasks(); renderCalendar();
+            const s = document.getElementById('taskSubject').value, t = document.getElementById('taskTitle').value, d = document.getElementById('taskDate').value;
+            if (!t || !d) return alert('入力してください！');
+            tasks.push({ id: Date.now(), subject: s, title: t, date: d, color: selectedTaskColor });
+            localStorage.setItem('myTasks', JSON.stringify(tasks)); document.getElementById('taskTitle').value = ''; document.getElementById('taskDate').value = ''; renderTasks(); renderCalendar();
         }
-
         function completeTask(id, taskTitle, taskDeadline) {
-            // 期限内かどうかのチェック
-            const today = new Date();
-            today.setHours(0,0,0,0);
-            const deadline = new Date(taskDeadline);
-            deadline.setHours(0,0,0,0);
-
-            let bonusMessage = "";
-            if (today <= deadline) {
-                userPoints += 10; // 期限内なら10ポイント獲得！
-                updatePointsDisplay();
-                bonusMessage = "\n\n🎉 期限内の完了おめでとうございます！10pt 獲得しました！";
-            } else {
-                bonusMessage = "\n\n⚠️ 期限を過ぎているためポイントは獲得できませんでした。次は頑張りましょう！";
-            }
-
-            alert(`課題「${taskTitle}」を完了にしました！✨${bonusMessage}`);
-
-            tasks = tasks.filter(t => t.id !== id);
-            localStorage.setItem('myTasks', JSON.stringify(tasks));
-            renderTasks(); renderCalendar();
-            renderShop(); // ショップのボタン状態などを更新
+            const today = new Date(); today.setHours(0,0,0,0);
+            const deadline = new Date(taskDeadline); deadline.setHours(0,0,0,0);
+            let msg = "";
+            if (today <= deadline) { userPoints += 10; updatePointsDisplay(); msg = "\n\n🎉 10pt 獲得しました！"; } 
+            else { msg = "\n\n⚠️ 期限切れのためポイントは獲得できませんでした。"; }
+            alert(`完了しました！✨${msg}`);
+            tasks = tasks.filter(t => t.id !== id); localStorage.setItem('myTasks', JSON.stringify(tasks)); renderTasks(); renderCalendar();
         }
-
         function renderTasks() {
             const view = document.getElementById('taskListView'); view.innerHTML = '';
             if (tasks.length === 0) return view.innerHTML = '<p style="color:gray;">未完了の課題はありません。✨</p>';
-
             tasks.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(t => {
-                const badge = t.subject ? `<span class="subject-badge">${t.subject}</span>` : '';
-                const item = document.createElement('div');
-                item.className = 'list-item';
-                item.style.borderLeft = `4px solid ${t.color || '#e53e3e'}`;
-                item.innerHTML = `<span>${badge}<strong>${t.title}</strong><br><small>締切: ${t.date}</small></span> 
-                                  <button class="btn-delete btn-done" onclick="completeTask(${t.id}, '${t.title}', '${t.date}')">完了</button>`;
+                const item = document.createElement('div'); item.className = 'list-item'; item.style.borderLeft = `4px solid ${t.color || '#e53e3e'}`;
+                item.innerHTML = `<span>${t.subject ? `<span class="subject-badge">${t.subject}</span>` : ''}<strong>${t.title}</strong><br><small>締切: ${t.date}</small></span> <button class="btn-delete btn-done" onclick="completeTask(${t.id}, '${t.title}', '${t.date}')">完了</button>`;
                 view.appendChild(item);
             });
         }
 
-        // 5. メモ
         function addMemo() {
-            const input = document.getElementById('memoInput'); if (!input.value) return;
-            memos.push({ id: Date.now(), text: input.value });
-            localStorage.setItem('myMemos', JSON.stringify(memos));
-            input.value = ''; renderMemos();
+            const v = document.getElementById('memoInput').value; if (!v) return;
+            memos.push({ id: Date.now(), text: v }); localStorage.setItem('myMemos', JSON.stringify(memos)); document.getElementById('memoInput').value = ''; renderMemos();
         }
-        function deleteMemo(id) {
-            memos = memos.filter(m => m.id !== id); localStorage.setItem('myMemos', JSON.stringify(memos)); renderMemos();
-        }
+        function deleteMemo(id) { memos = memos.filter(m => m.id !== id); localStorage.setItem('myMemos', JSON.stringify(memos)); renderMemos(); }
         function renderMemos() {
             const view = document.getElementById('memoListView'); view.innerHTML = '';
             if (memos.length === 0) return view.innerHTML = '<p style="color:gray;">メモはありません。</p>';
             memos.forEach(m => {
-                const item = document.createElement('div'); item.className = 'list-item list-item-memo';
-                item.innerHTML = `<span>${m.text}</span> <button class="btn-delete" onclick="deleteMemo(${m.id})">削除</button>`;
-                view.appendChild(item);
+                const item = document.createElement('div'); item.className = 'list-item'; item.style.borderLeft = '4px solid #ecc94b';
+                item.innerHTML = `<span>${m.text}</span> <button class="btn-delete" onclick="deleteMemo(${m.id})">削除</button>`; view.appendChild(item);
             });
         }
 
-        // 初期起動時のコール
+        // 初期化処理
         updatePointsDisplay();
         renderTimetable();
-        renderShop();
-        initPalette('eventColorPalette', selectedEventColor, (color) => { selectedEventColor = color; });
-        initPalette('taskColorPalette', selectedTaskColor, (color) => { selectedTaskColor = color; });
-        renderCalendar(); renderTasks(); renderMemos();
+        renderStickerPalette();
+        initPalette('eventColorPalette', selectedEventColor, c => selectedEventColor = c);
+        initPalette('taskColorPalette', selectedTaskColor, c => selectedTaskColor = c);
+        renderCalendar(); 
+        renderTasks(); 
+        renderMemos();
         updateSubjectDropdown();
     </script>
 </body>
