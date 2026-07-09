@@ -14,9 +14,13 @@
         .sidebar a { display: block; color: #e2e8f0; text-decoration: none; padding: 12px; margin-bottom: 10px; border-radius: 6px; transition: background 0.2s; font-weight: bold; }
         .sidebar a:hover { background-color: #4a5568; }
 
+        /* ヘッダーエリア（ポイント表示用） */
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .point-display { background: linear-gradient(135deg, #ecc94b, #d69e2e); color: #2d3748; padding: 10px 20px; border-radius: 20px; font-weight: bold; font-size: 1.1em; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 8px; }
+
         /* メインコンテンツ */
         .main-content { margin-left: 220px; padding: 30px; width: calc(100% - 220px); box-sizing: border-box; }
-        h1 { color: #4a5568; margin-top: 0; margin-bottom: 25px; }
+        h1 { color: #4a5568; margin: 0; }
         .app-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1200px; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); scroll-margin-top: 30px; }
         .card h2 { margin-top: 0; color: #4c51bf; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
@@ -24,7 +28,7 @@
         input[type="text"], input[type="date"], select { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; }
         .input-group { display: flex; gap: 10px; align-items: center; margin: 8px 0; }
         
-        /* 10色パレット用のデザイン */
+        /* カラーパレット */
         .color-picker-container { display: flex; align-items: center; margin: 10px 0; background: #f7fafc; padding: 8px 12px; border-radius: 6px; border: 1px solid #edf2f7; }
         .color-palette { display: flex; gap: 8px; flex-wrap: wrap; }
         .palette-btn { width: 22px; height: 22px; border: 1px solid #cbd5e0; border-radius: 50%; cursor: pointer; transition: transform 0.1s; padding: 0; position: relative; }
@@ -43,18 +47,24 @@
         .btn-done { background-color: #38a169; }
         .subject-badge { background-color: #e2e8f0; color: #4a5568; padding: 2px 6px; border-radius: 4px; font-size: 0.8em; margin-right: 5px; font-weight: bold; }
         
+        /* スタンプショップのデザイン */
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; margin-top: 10px; }
+        .shop-item { border: 1px solid #cbd5e0; border-radius: 8px; padding: 10px; text-align: center; background: #f7fafc; position: relative; }
+        .shop-stamp { font-size: 1.5em; display: block; margin-bottom: 5px; }
+        .shop-price { font-size: 0.75em; color: #718096; font-weight: bold; display: block; }
+        .shop-btn { background: #4c51bf; color: white; border: none; border-radius: 4px; padding: 2px 6px; font-size: 0.75em; cursor: pointer; width: 100%; margin-top: 5px; }
+        .shop-btn.owned { background: #cbd5e0; color: #718096; cursor: default; }
+
         /* --------------------------
-           時間割（レイアウト大幅改善）
+           時間割（スタンプ対応）
            -------------------------- */
         .timetable { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; background: white; }
         .timetable th, .timetable td { border: 1px solid #cbd5e0; text-align: center; padding: 0; transition: background-color 0.2s; }
         .timetable th { background-color: #edf2f7; padding: 8px 0; font-size: 0.9em; color: #4a5568; }
         .timetable th:first-child { width: 30px; }
         
-        /* マス目全体をコンテナ化 */
         .timetable td > div { position: relative; width: 100%; height: 100%; min-height: 65px; }
         
-        /* テキスト入力枠はマス目いっぱいに広げる */
         .timetable td input[type="text"] { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             border: none; padding: 10px 5px; text-align: center; box-sizing: border-box; 
@@ -62,7 +72,12 @@
         }
         .timetable td input[type="text"]:focus { outline: none; background: rgba(255,255,255,0.7); z-index: 1; }
 
-        /* 極小のカラー選択ボタン（右下に配置） */
+        /* 配置されたスタンプの見た目 */
+        .cell-stamp-display {
+            position: absolute; top: 4px; left: 4px; font-size: 1.1em; pointer-events: none; z-index: 2;
+        }
+
+        /* 極小のカラー＆スタンプ選択ボタン（右下に配置） */
         .cell-color-picker {
             position: absolute; bottom: 4px; right: 4px;
             width: 14px; height: 14px; border-radius: 50%;
@@ -97,13 +112,19 @@
     <div class="sidebar">
         <h2>🎨 モチベキャンパス</h2>
         <a href="#card-timetable">📅 時間割</a>
+        <a href="#card-shop">🪙 ショップ</a>
         <a href="#card-calendar">👀 カレンダー</a>
         <a href="#card-tasks">📝 課題</a>
         <a href="#card-memos">✏️ メモ</a>
     </div>
 
     <div class="main-content">
-        <h1>ようこそ！キャンパスダッシュボードへ</h1>
+        <div class="header-bar">
+            <h1>ようこそ！キャンパスダッシュボードへ</h1>
+            <div class="point-display">
+                <span>🪙</span> <span id="userPointsDisplay">0</span> pt
+            </div>
+        </div>
 
         <div class="app-container">
 
@@ -113,6 +134,12 @@
                     <thead><tr><th></th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th></tr></thead>
                     <tbody id="timetableBody"></tbody>
                 </table>
+            </div>
+
+            <div id="card-shop" class="card" style="grid-column: span 2;">
+                <h2>🪙 モチベスタンプショップ (1つ 30pt)</h2>
+                <p style="font-size: 0.85em; color: #718096; margin: 0 0 10px 0;">期限内に課題を完了させると 10pt ゲット！貯まったポイントでスタンプを解放して、時間割をデコろう！</p>
+                <div class="shop-grid" id="shopGrid"></div>
             </div>
 
             <div id="card-calendar" class="card" style="grid-column: span 2;">
@@ -141,8 +168,6 @@
                         <span style="font-size: 0.85em; color: #718096; margin-right: 12px; font-weight: bold;">ラベルの色:</span>
                         <div class="color-palette" id="eventColorPalette"></div>
                     </div>
-                    
-                    <p style="font-size: 0.85em; color: gray; margin-top: 5px;">※予定を削除したい時は、カレンダー上のラベルを直接クリックしてください。</p>
                 </div>
             </div>
 
@@ -176,7 +201,6 @@
     </div>
 
     <script>
-        // 厳選したパステル10色
         const paletteColors = [
             { code: '#fed7d7', name: 'パステル赤' },
             { code: '#feebc8', name: 'パステル橙' },
@@ -190,6 +214,12 @@
             { code: '#f3f4f6', name: 'パステルグレー' }
         ];
 
+        // 購入可能なスタンプの定義
+        const availableStamps = ['⭐', '🔥', '💖', '💯', '☕', '💡', '🐾', '🎮', '🎬', '✈️'];
+
+        // 各種データの初期化
+        let userPoints = parseInt(localStorage.getItem('userPoints')) || 0;
+        let ownedStamps = JSON.parse(localStorage.getItem('ownedStamps')) || []; // 購入済みのスタンプリスト
         let tasks = JSON.parse(localStorage.getItem('myTasks')) || [];
         let events = JSON.parse(localStorage.getItem('myEvents')) || [];
         let memos = JSON.parse(localStorage.getItem('myMemos')) || [];
@@ -199,81 +229,155 @@
         let selectedEventColor = '#c6f6d5'; 
         let selectedTaskColor = '#fed7d7';  
 
-        // 1. 時間割の生成（小さな丸ボタンに改修）
+        // ポイント表示の更新
+        function updatePointsDisplay() {
+            document.getElementById('userPointsDisplay').textContent = userPoints;
+            localStorage.setItem('userPoints', userPoints);
+        }
+
+        // 1. 時間割の生成（スタンプの表示機能を追加）
         const days = ['mon', 'tue', 'wed', 'thu', 'fri'];
         const periods = [1, 2, 3, 4, 5];
         const tbody = document.getElementById('timetableBody');
 
-        periods.forEach(period => {
-            let row = document.createElement('tr');
-            let periodTh = document.createElement('th');
-            periodTh.textContent = period;
-            row.appendChild(periodTh);
-            days.forEach(day => {
-                let td = document.createElement('td');
-                let cellId = `tt-${day}-${period}`;
-                
-                // セレクトボックスを「極小の丸い点」として配置
-                let selectHtml = `<select id="${cellId}-color" class="cell-color-picker" onchange="saveTimetable('${cellId}')" title="色を変更">`;
-                selectHtml += `<option value="#ffffff">白 (色なし)</option>`;
-                paletteColors.forEach(c => {
-                    selectHtml += `<option value="${c.code}" style="background-color: ${c.code};">${c.name}</option>`;
+        function renderTimetable() {
+            tbody.innerHTML = '';
+            periods.forEach(period => {
+                let row = document.createElement('tr');
+                let periodTh = document.createElement('th');
+                periodTh.textContent = period;
+                row.appendChild(periodTh);
+                days.forEach(day => {
+                    let td = document.createElement('td');
+                    let cellId = `tt-${day}-${period}`;
+                    
+                    // セレクトボックスの選択肢構築
+                    let selectHtml = `<select id="${cellId}-color" class="cell-color-picker" onchange="saveTimetable('${cellId}')" title="色・スタンプの変更">`;
+                    selectHtml += `<optgroup label="背景カラー">`;
+                    selectHtml += `<option value="#ffffff">白 (色なし)</option>`;
+                    paletteColors.forEach(c => {
+                        selectHtml += `<option value="${c.code}">${c.name}</option>`;
+                    });
+                    selectHtml += `</optgroup>`;
+                    
+                    // 解放済みのスタンプを選択肢に追加
+                    selectHtml += `<optgroup label="スタンプ (左上に配置)">`;
+                    selectHtml += `<option value="none">スタンプなし</option>`;
+                    ownedStamps.forEach(stamp => {
+                        selectHtml += `<option value="stamp-${stamp}">スタンプ: ${stamp}</option>`;
+                    });
+                    selectHtml += `</optgroup>`;
+                    selectHtml += `</select>`;
+
+                    td.innerHTML = `
+                        <div>
+                            <span id="${cellId}-stampDisplay" class="cell-stamp-display"></span>
+                            <input type="text" id="${cellId}" placeholder=" " oninput="saveTimetable('${cellId}')">
+                            ${selectHtml}
+                        </div>
+                    `;
+                    row.appendChild(td);
                 });
-                selectHtml += `</select>`;
-
-                td.innerHTML = `
-                    <div>
-                        <input type="text" id="${cellId}" placeholder=" " oninput="saveTimetable('${cellId}')">
-                        ${selectHtml}
-                    </div>
-                `;
-                row.appendChild(td);
+                tbody.appendChild(row);
             });
-            tbody.appendChild(row);
-        });
 
-        // データの復元
-        for (let cellId in timetableData) {
-            let inputElement = document.getElementById(cellId);
-            let colorElement = document.getElementById(`${cellId}-color`);
-            let saved = timetableData[cellId];
-            
-            if (typeof saved === 'string') { saved = { text: saved, color: "#ffffff" }; }
-            
-            if (inputElement && saved) {
-                inputElement.value = saved.text || "";
-                inputElement.parentElement.parentElement.style.backgroundColor = saved.color || "#ffffff";
-            }
-            if (colorElement && saved) {
-                let savedColor = saved.color || "#ffffff";
-                let hasColor = Array.from(colorElement.options).some(opt => opt.value === savedColor);
-                if (!hasColor && savedColor !== "#ffffff") {
-                    let opt = document.createElement('option');
-                    opt.value = savedColor; opt.textContent = "過去の色";
-                    colorElement.appendChild(opt);
+            // データの復元
+            for (let cellId in timetableData) {
+                let inputElement = document.getElementById(cellId);
+                let colorElement = document.getElementById(`${cellId}-color`);
+                let stampDisplay = document.getElementById(`${cellId}-stampDisplay`);
+                let saved = timetableData[cellId];
+                
+                if (typeof saved === 'string') { saved = { text: saved, color: "#ffffff", stamp: "none" }; }
+                if (!saved.stamp) saved.stamp = "none";
+                
+                if (inputElement && saved) {
+                    inputElement.value = saved.text || "";
+                    inputElement.parentElement.parentElement.style.backgroundColor = saved.color || "#ffffff";
                 }
-                colorElement.value = savedColor;
-                colorElement.style.backgroundColor = savedColor; // 丸ボタン自身の色も変更
+                if (stampDisplay && saved.stamp !== "none") {
+                    stampDisplay.textContent = saved.stamp;
+                }
+                if (colorElement && saved) {
+                    colorElement.value = saved.color || "#ffffff";
+                    colorElement.style.backgroundColor = saved.color || "#ffffff";
+                }
             }
         }
 
         function saveTimetable(cellId) {
             let textVal = document.getElementById(cellId).value;
             let colorSelect = document.getElementById(`${cellId}-color`);
-            let colorVal = colorSelect.value;
+            let selectedVal = colorSelect.value;
             
-            timetableData[cellId] = { text: textVal, color: colorVal };
+            // 現在の保存データを取得、なければ初期化
+            if (!timetableData[cellId]) {
+                timetableData[cellId] = { text: "", color: "#ffffff", stamp: "none" };
+            }
+            
+            // 選択されたのがスタンプかカラーかで処理を分ける
+            if (selectedVal.startsWith('stamp-')) {
+                let stampChar = selectedVal.replace('stamp-', '');
+                timetableData[cellId].stamp = stampChar;
+                // セレクトボックスの選択状態を「カラー」側に戻しておく（見栄えのため）
+                colorSelect.value = timetableData[cellId].color;
+            } else if (selectedVal === 'none') {
+                timetableData[cellId].stamp = "none";
+                colorSelect.value = timetableData[cellId].color;
+            } else {
+                timetableData[cellId].color = selectedVal;
+                colorSelect.style.backgroundColor = selectedVal;
+            }
+
+            timetableData[cellId].text = textVal;
             localStorage.setItem('myTimetable', JSON.stringify(timetableData));
             
-            // マスの背景色と、極小ボタン自体の背景色を両方更新
-            document.getElementById(cellId).parentElement.parentElement.style.backgroundColor = colorVal;
-            colorSelect.style.backgroundColor = colorVal;
+            // 画面表示の更新
+            document.getElementById(cellId).parentElement.parentElement.style.backgroundColor = timetableData[cellId].color;
+            document.getElementById(`${cellId}-stampDisplay`).textContent = timetableData[cellId].stamp === "none" ? "" : timetableData[cellId].stamp;
             
             updateSubjectDropdown();
         }
 
+        // 1.8 ショップの描画
+        function renderShop() {
+            const shopGrid = document.getElementById('shopGrid');
+            shopGrid.innerHTML = '';
+            
+            availableStamps.forEach(stamp => {
+                const isOwned = ownedStamps.includes(stamp);
+                const item = document.createElement('div');
+                item.className = 'shop-item';
+                
+                item.innerHTML = `
+                    <span class="shop-stamp">${stamp}</span>
+                    <span class="shop-price">${isOwned ? '解放済' : '30 pt'}</span>
+                    <button class="shop-btn ${isOwned ? 'owned' : ''}" ${isOwned ? 'disabled' : ''} onclick="buyStamp('${stamp}')">
+                        ${isOwned ? '利用可能' : '購入する'}
+                    </button>
+                `;
+                shopGrid.appendChild(item);
+            });
+        }
+
+        function buyStamp(stamp) {
+            if (userPoints < 30) {
+                alert('ポイントが足りません！課題を終わらせてポイントを貯めましょう。💪');
+                return;
+            }
+            if (confirm(`30pt を消費してスタンプ「${stamp}」を解放しますか？`)) {
+                userPoints -= 30;
+                ownedStamps.push(stamp);
+                localStorage.setItem('ownedStamps', JSON.stringify(ownedStamps));
+                updatePointsDisplay();
+                renderShop();
+                renderTimetable(); // 時間割のドロップダウンの選択肢を増やすために再描画
+            }
+        }
+
         function updateSubjectDropdown() {
             const select = document.getElementById('taskSubject');
+            if(!select) return;
             select.innerHTML = '<option value="">教科を選択 (任意)</option>'; 
             let subjects = new Set();
             for (let key in timetableData) {
@@ -286,7 +390,6 @@
                 option.value = subject; option.textContent = subject; select.appendChild(option);
             });
         }
-        updateSubjectDropdown();
 
         function initPalette(targetId, defaultValue, callback) {
             const container = document.getElementById(targetId);
@@ -388,7 +491,7 @@
             }
         }
 
-        // 4. 課題の管理
+        // 4. 課題の管理 (ポイント獲得ロジック追加)
         function addTask() {
             const subject = document.getElementById('taskSubject').value;
             const title = document.getElementById('taskTitle').value;
@@ -401,10 +504,28 @@
             renderTasks(); renderCalendar();
         }
 
-        function completeTask(id) {
+        function completeTask(id, taskTitle, taskDeadline) {
+            // 期限内かどうかのチェック
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            const deadline = new Date(taskDeadline);
+            deadline.setHours(0,0,0,0);
+
+            let bonusMessage = "";
+            if (today <= deadline) {
+                userPoints += 10; // 期限内なら10ポイント獲得！
+                updatePointsDisplay();
+                bonusMessage = "\n\n🎉 期限内の完了おめでとうございます！10pt 獲得しました！";
+            } else {
+                bonusMessage = "\n\n⚠️ 期限を過ぎているためポイントは獲得できませんでした。次は頑張りましょう！";
+            }
+
+            alert(`課題「${taskTitle}」を完了にしました！✨${bonusMessage}`);
+
             tasks = tasks.filter(t => t.id !== id);
             localStorage.setItem('myTasks', JSON.stringify(tasks));
             renderTasks(); renderCalendar();
+            renderShop(); // ショップのボタン状態などを更新
         }
 
         function renderTasks() {
@@ -416,7 +537,8 @@
                 const item = document.createElement('div');
                 item.className = 'list-item';
                 item.style.borderLeft = `4px solid ${t.color || '#e53e3e'}`;
-                item.innerHTML = `<span>${badge}<strong>${t.title}</strong><br><small>締切: ${t.date}</small></span> <button class="btn-delete btn-done" onclick="completeTask(${t.id})">完了</button>`;
+                item.innerHTML = `<span>${badge}<strong>${t.title}</strong><br><small>締切: ${t.date}</small></span> 
+                                  <button class="btn-delete btn-done" onclick="completeTask(${t.id}, '${t.title}', '${t.date}')">完了</button>`;
                 view.appendChild(item);
             });
         }
@@ -442,9 +564,13 @@
         }
 
         // 初期起動時のコール
+        updatePointsDisplay();
+        renderTimetable();
+        renderShop();
         initPalette('eventColorPalette', selectedEventColor, (color) => { selectedEventColor = color; });
         initPalette('taskColorPalette', selectedTaskColor, (color) => { selectedTaskColor = color; });
         renderCalendar(); renderTasks(); renderMemos();
+        updateSubjectDropdown();
     </script>
 </body>
 </html>
