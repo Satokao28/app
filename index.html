@@ -68,6 +68,9 @@
         .timetable td input[type="text"]:focus { outline: none; background: rgba(255,255,255,0.7); z-index: 1; }
         .cell-stamp-display { position: absolute; top: 4px; left: 4px; font-size: 1.1em; pointer-events: none; z-index: 2; }
         .cell-color-picker { position: absolute; bottom: 4px; right: 4px; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #a0aec0; background-color: #ffffff; appearance: none; cursor: pointer; color: transparent; padding: 0; margin: 0; z-index: 5; }
+        
+        /* 🌟 今回追加した修正：リストの中身は見えなくならないように文字色を黒に指定 🌟 */
+        .cell-color-picker option { color: #333; background-color: #fff; }
 
         /* カレンダー */
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -379,7 +382,6 @@
             return el;
         }
 
-        // 🌟 複数配置されたシール帳を同時に更新するよう変更
         function renderStickerPalette() {
             const palettes = document.querySelectorAll('.sticker-palette-target');
             palettes.forEach(palette => {
