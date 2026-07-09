@@ -27,7 +27,7 @@
         h1 { color: #4a5568; margin: 0; }
         .app-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1200px; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); scroll-margin-top: 30px; position: relative; }
-        .card h2 { margin-top: 0; color: #4c51bf; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; }
+        .card h2 { margin-top: 0; color: #4c51bf; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 15px; }
         
         input[type="text"], input[type="date"], select { width: 100%; padding: 8px; margin: 8px 0; border: 1px solid #cbd5e0; border-radius: 6px; box-sizing: border-box; }
         .input-group { display: flex; gap: 10px; align-items: center; margin: 8px 0; }
@@ -77,8 +77,12 @@
         .cal-date-num { font-size: 0.85em; color: #718096; margin-bottom: 5px; }
         .cal-label { font-size: 0.75em; padding: 2px 4px; border-radius: 3px; margin-bottom: 3px; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; cursor: pointer; color: #2d3748; }
 
-        /* ★ 新規：ドラッグ＆ドロップ用スタイル */
+        /* ドラッグ＆ドロップ・シール帳用スタイル */
         #calendar-drop-zone { position: relative; overflow: hidden; border-radius: 6px; }
+        
+        /* 🌟 新規：時間割のドロップゾーンスタイル */
+        #timetable-drop-zone { position: relative; border-radius: 6px; }
+        #timetablePlacedStampsContainer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
         
         .sticker-palette-container { background: #fdf2f8; border: 2px dashed #f687b3; padding: 10px; border-radius: 8px; margin-bottom: 15px; }
         .sticker-palette-title { font-size: 0.85em; color: #d53f8c; font-weight: bold; margin-bottom: 5px; display: block; }
@@ -87,7 +91,7 @@
         .draggable-stamp { font-size: 1.8em; cursor: grab; user-select: none; transition: transform 0.1s; display: inline-block; }
         .draggable-stamp:active { cursor: grabbing; transform: scale(1.2); }
         
-        .placed-stamp { position: absolute; font-size: 1.8em; cursor: grab; user-select: none; z-index: 50; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); }
+        .placed-stamp { position: absolute; font-size: 1.8em; cursor: grab; user-select: none; z-index: 50; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); pointer-events: auto; }
         .placed-stamp:active { cursor: grabbing; }
 
     </style>
@@ -97,6 +101,7 @@
     <div class="sidebar">
         <h2>🎨 モチベキャンパス</h2>
         <a id="nav-dashboard" class="active" onclick="switchView('dashboard')">🏠 ホーム (時間割など)</a>
+        <a id="nav-tasks" onclick="switchView('tasks')">📝 課題・メモ</a>
         <a id="nav-shop" onclick="switchView('shop')">🪙 スタンプショップ</a>
     </div>
 
@@ -113,23 +118,27 @@
                 
                 <div id="card-timetable" class="card" style="grid-column: span 2;">
                     <h2>📅 大学の時間割</h2>
-                    <table class="timetable">
-                        <thead><tr><th></th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th></tr></thead>
-                        <tbody id="timetableBody"></tbody>
-                    </table>
+                    
+                    <div class="sticker-palette-container">
+                        <span class="sticker-palette-title">🎀 シール帳 (好きなスタンプをカレンダーや時間割にドラッグ！)</span>
+                        <div class="sticker-palette" id="stickerPalette">
+                            <span style="font-size: 0.85em; color: gray;">ショップでスタンプを買うとここに並びます</span>
+                        </div>
+                        <p style="font-size: 0.75em; color: gray; margin: 5px 0 0 0;">※貼ったスタンプを消す時は「ダブルクリック」、サイズ変更はスタンプの上で「マウスホイール」</p>
+                    </div>
+
+                    <div id="timetable-drop-zone" ondragover="handleDragOver(event)" ondrop="handleDrop(event, 'timetable')">
+                        <table class="timetable">
+                            <thead><tr><th></th><th>月</th><th>火</th><th>水</th><th>木</th><th>金</th></tr></thead>
+                            <tbody id="timetableBody"></tbody>
+                        </table>
+                        <div id="timetablePlacedStampsContainer"></div>
+                    </div>
                 </div>
 
                 <div id="card-calendar" class="card" style="grid-column: span 2;">
                     <h2>👀 月間カレンダー & 予定</h2>
                     
-                    <div class="sticker-palette-container">
-                        <span class="sticker-palette-title">🎀 シール帳 (好きなスタンプをカレンダーにドラッグ！)</span>
-                        <div class="sticker-palette" id="stickerPalette">
-                            <span style="font-size: 0.85em; color: gray;">ショップでスタンプを買うとここに並びます</span>
-                        </div>
-                        <p style="font-size: 0.75em; color: gray; margin: 5px 0 0 0;">※貼ったスタンプを消す時は「ダブルクリック」してください。</p>
-                    </div>
-
                     <div class="calendar-header">
                         <button class="btn btn-small" onclick="prevMonth()">◀ 先月</button>
                         <h3 id="monthYearDisplay"></h3>
@@ -139,7 +148,7 @@
                         </div>
                     </div>
                     
-                    <div id="calendar-drop-zone" ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
+                    <div id="calendar-drop-zone" ondragover="handleDragOver(event)" ondrop="handleDrop(event, 'calendar')">
                         <div id="calendarGrid" class="calendar-grid"></div>
                         <div id="placedStampsContainer"></div>
                     </div>
@@ -158,6 +167,11 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
+
+        <div id="view-tasks" class="view-section">
+            <div class="app-container">
                 <div id="card-tasks" class="card">
                     <h2>📝 課題</h2>
                     <div>
@@ -181,20 +195,20 @@
                     </div>
                     <div id="memoListView"></div>
                 </div>
-
             </div>
         </div>
+
         <div id="view-shop" class="view-section">
             <div class="card" style="max-width: 800px; margin: 0 auto;">
                 <h2>🪙 モチベスタンプショップ</h2>
                 <p style="color: #718096; margin-bottom: 20px;">
                     課題を期限内に完了させて <strong>10pt</strong> をゲットしよう！<br>
-                    スタンプを購入すると、時間割のマスの中や、カレンダーの上に自由に貼れるようになります。
+                    スタンプを購入すると、時間割やカレンダーの上に自由に貼れるようになります。
                 </p>
                 <div class="shop-grid" id="shopGrid"></div>
             </div>
         </div>
-        </div>
+    </div>
 
     <script>
         const paletteColors = [
@@ -214,8 +228,9 @@
         let memos = JSON.parse(localStorage.getItem('myMemos')) || [];
         let timetableData = JSON.parse(localStorage.getItem('myTimetable')) || {};
         
-        // ★新規：カレンダー上に配置されたスタンプの座標データ { id, stamp, x, y, monthYear }
         let calendarStamps = JSON.parse(localStorage.getItem('myCalendarStamps')) || [];
+        // 🌟 新規：時間割用のスタンプ保存配列
+        let timetableStamps = JSON.parse(localStorage.getItem('myTimetableStamps')) || [];
         
         let currentDate = new Date();
         let selectedEventColor = '#c6f6d5'; 
@@ -229,7 +244,14 @@
             document.getElementById(`view-${viewId}`).classList.add('active');
             document.getElementById(`nav-${viewId}`).classList.add('active');
             
-            document.getElementById('pageTitle').textContent = viewId === 'dashboard' ? 'ホーム' : 'スタンプショップ';
+            // 🌟 タイトルの出し分けを追加
+            if (viewId === 'dashboard') {
+                document.getElementById('pageTitle').textContent = 'ホーム';
+            } else if (viewId === 'tasks') {
+                document.getElementById('pageTitle').textContent = '課題・メモ';
+            } else if (viewId === 'shop') {
+                document.getElementById('pageTitle').textContent = 'スタンプショップ';
+            }
             
             if (viewId === 'shop') renderShop();
         }
@@ -239,93 +261,126 @@
             localStorage.setItem('userPoints', userPoints);
         }
 
-        // ===== ドラッグ＆ドロップロジック =====
+        // ===== ドラッグ＆ドロップ ＆ サイズ変更ロジック =====
         function handleDragStart(event, type, value) {
-            // type: 'new' (パレットから新規) または 'exist' (配置済みを移動)
-            // value: 新規ならスタンプの文字、既存ならそのスタンプのID
             event.dataTransfer.setData('text/plain', JSON.stringify({ type, value }));
             event.dataTransfer.effectAllowed = 'move';
         }
 
         function handleDragOver(event) {
-            event.preventDefault(); // ドロップを許可する
+            event.preventDefault(); 
             event.dataTransfer.dropEffect = 'move';
         }
 
-        function handleDrop(event) {
+        // 🌟 どちらのエリアに落とされたか判定 (dropZoneType)
+        function handleDrop(event, dropZoneType) {
             event.preventDefault();
-            const dropZone = document.getElementById('calendar-drop-zone');
+            const dropZone = event.currentTarget;
             const rect = dropZone.getBoundingClientRect();
             
-            // マウスの座標から、ドロップエリア左上を(0,0)とした相対座標を計算
-            // スタンプの中心がマウスの先に来るように少しズラす (約15px)
             const x = event.clientX - rect.left - 15;
             const y = event.clientY - rect.top - 15;
 
-            // 今表示している月を記録（月を切り替えた時に出し分けるため）
             const currentMonthYear = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
 
             try {
                 const data = JSON.parse(event.dataTransfer.getData('text/plain'));
                 
+                // ターゲットを判別
+                const targetArray = dropZoneType === 'calendar' ? calendarStamps : timetableStamps;
+                const storageKey = dropZoneType === 'calendar' ? 'myCalendarStamps' : 'myTimetableStamps';
+                
                 if (data.type === 'new') {
-                    // 新しいスタンプをカレンダーに追加
-                    calendarStamps.push({
+                    targetArray.push({
                         id: Date.now(),
                         stamp: data.value,
                         x: x,
                         y: y,
-                        monthYear: currentMonthYear
+                        scale: 1, // 🌟 追加：初期サイズ倍率
+                        monthYear: dropZoneType === 'calendar' ? currentMonthYear : 'all'
                     });
                 } else if (data.type === 'exist') {
-                    // 既にカレンダーにあるスタンプを移動
                     const stampId = data.value;
-                    const targetStamp = calendarStamps.find(s => s.id === stampId);
+                    const targetStamp = targetArray.find(s => s.id === stampId);
                     if (targetStamp) {
                         targetStamp.x = x;
                         targetStamp.y = y;
                     }
                 }
                 
-                localStorage.setItem('myCalendarStamps', JSON.stringify(calendarStamps));
+                localStorage.setItem(storageKey, JSON.stringify(targetArray));
                 renderPlacedStamps();
             } catch (e) {
                 console.error("ドロップデータのパースに失敗しました", e);
             }
         }
 
-        function removePlacedStamp(id) {
-            calendarStamps = calendarStamps.filter(s => s.id !== id);
-            localStorage.setItem('myCalendarStamps', JSON.stringify(calendarStamps));
+        // 🌟 サイズ変更（ホイールイベント）
+        function handleWheel(event, id, dropZoneType) {
+            event.preventDefault(); // 画面のスクロールを防ぐ
+            const targetArray = dropZoneType === 'calendar' ? calendarStamps : timetableStamps;
+            const storageKey = dropZoneType === 'calendar' ? 'myCalendarStamps' : 'myTimetableStamps';
+            const stamp = targetArray.find(s => s.id === id);
+            
+            if (stamp) {
+                // 上で大きく、下で小さく (0.1ずつ変化、0.5〜3.0の範囲)
+                const scaleChange = event.deltaY < 0 ? 0.1 : -0.1;
+                stamp.scale = Math.max(0.5, Math.min(3.0, (stamp.scale || 1) + scaleChange));
+                
+                localStorage.setItem(storageKey, JSON.stringify(targetArray));
+                renderPlacedStamps();
+            }
+        }
+
+        function removePlacedStamp(id, dropZoneType) {
+            if (dropZoneType === 'calendar') {
+                calendarStamps = calendarStamps.filter(s => s.id !== id);
+                localStorage.setItem('myCalendarStamps', JSON.stringify(calendarStamps));
+            } else {
+                timetableStamps = timetableStamps.filter(s => s.id !== id);
+                localStorage.setItem('myTimetableStamps', JSON.stringify(timetableStamps));
+            }
             renderPlacedStamps();
         }
 
+        // 🌟 統合されたスタンプ描画機能
         function renderPlacedStamps() {
-            const container = document.getElementById('placedStampsContainer');
-            container.innerHTML = '';
+            // カレンダー用
+            const calContainer = document.getElementById('placedStampsContainer');
+            if (calContainer) {
+                calContainer.innerHTML = '';
+                const currentMonthYear = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
+                calendarStamps.forEach(s => {
+                    if (s.monthYear && s.monthYear !== currentMonthYear) return;
+                    calContainer.appendChild(createStampElement(s, 'calendar'));
+                });
+            }
+
+            // 時間割用
+            const ttContainer = document.getElementById('timetablePlacedStampsContainer');
+            if (ttContainer) {
+                ttContainer.innerHTML = '';
+                timetableStamps.forEach(s => {
+                    ttContainer.appendChild(createStampElement(s, 'timetable'));
+                });
+            }
+        }
+
+        function createStampElement(s, dropZoneType) {
+            const el = document.createElement('div');
+            el.className = 'placed-stamp';
+            el.textContent = s.stamp;
+            el.style.left = `${s.x}px`;
+            el.style.top = `${s.y}px`;
+            el.style.transform = `scale(${s.scale || 1})`; // サイズ適用
+            el.draggable = true;
             
-            const currentMonthYear = `${currentDate.getFullYear()}-${currentDate.getMonth()}`;
-
-            calendarStamps.forEach(s => {
-                // 現在表示している月以外のスタンプは非表示
-                if (s.monthYear && s.monthYear !== currentMonthYear) return;
-
-                const el = document.createElement('div');
-                el.className = 'placed-stamp';
-                el.textContent = s.stamp;
-                el.style.left = `${s.x}px`;
-                el.style.top = `${s.y}px`;
-                el.draggable = true;
-                
-                // 動かすためのイベント
-                el.ondragstart = (e) => handleDragStart(e, 'exist', s.id);
-                // ダブルクリックで削除
-                el.ondblclick = () => removePlacedStamp(s.id);
-                // スマホなどタップ向けに、一応titleを付けておく
-                el.title = "ダブルクリックで剥がす";
-
-                container.appendChild(el);
-            });
+            el.ondragstart = (e) => handleDragStart(e, 'exist', s.id);
+            el.ondblclick = () => removePlacedStamp(s.id, dropZoneType);
+            el.onwheel = (e) => handleWheel(e, s.id, dropZoneType); // サイズ変更イベント
+            
+            el.title = "ダブルクリックで消去 / スクロールでサイズ変更";
+            return el;
         }
 
         function renderStickerPalette() {
@@ -362,15 +417,12 @@
                     let td = document.createElement('td');
                     let cellId = `tt-${day}-${period}`;
                     
-                    let selectHtml = `<select id="${cellId}-color" class="cell-color-picker" onchange="saveTimetable('${cellId}')" title="色・スタンプの変更">`;
-                    selectHtml += `<optgroup label="背景カラー"><option value="#ffffff">白 (色なし)</option>`;
+                    let selectHtml = `<select id="${cellId}-color" class="cell-color-picker" onchange="saveTimetable('${cellId}')" title="背景色の変更">`;
+                    selectHtml += `<option value="#ffffff">白 (色なし)</option>`;
                     paletteColors.forEach(c => selectHtml += `<option value="${c.code}">${c.name}</option>`);
-                    selectHtml += `</optgroup><optgroup label="マス内のスタンプ">`;
-                    selectHtml += `<option value="none">スタンプなし</option>`;
-                    ownedStamps.forEach(stamp => selectHtml += `<option value="stamp-${stamp}">スタンプ: ${stamp}</option>`);
-                    selectHtml += `</optgroup></select>`;
+                    selectHtml += `</select>`;
 
-                    td.innerHTML = `<div><span id="${cellId}-stampDisplay" class="cell-stamp-display"></span><input type="text" id="${cellId}" placeholder=" " oninput="saveTimetable('${cellId}')">${selectHtml}</div>`;
+                    td.innerHTML = `<div><input type="text" id="${cellId}" placeholder=" " oninput="saveTimetable('${cellId}')">${selectHtml}</div>`;
                     row.appendChild(td);
                 });
                 tbody.appendChild(row);
@@ -378,18 +430,15 @@
 
             for (let cellId in timetableData) {
                 let saved = timetableData[cellId];
-                if (typeof saved === 'string') saved = { text: saved, color: "#ffffff", stamp: "none" };
-                if (!saved.stamp) saved.stamp = "none";
+                if (typeof saved === 'string') saved = { text: saved, color: "#ffffff" };
                 
                 let inputEl = document.getElementById(cellId);
                 let colorEl = document.getElementById(`${cellId}-color`);
-                let stampDisplay = document.getElementById(`${cellId}-stampDisplay`);
                 
                 if (inputEl) {
                     inputEl.value = saved.text || "";
                     inputEl.parentElement.parentElement.style.backgroundColor = saved.color || "#ffffff";
                 }
-                if (stampDisplay && saved.stamp !== "none") stampDisplay.textContent = saved.stamp;
                 if (colorEl) {
                     colorEl.value = saved.color || "#ffffff";
                     colorEl.style.backgroundColor = saved.color || "#ffffff";
@@ -402,24 +451,14 @@
             let colorSelect = document.getElementById(`${cellId}-color`);
             let selectedVal = colorSelect.value;
             
-            if (!timetableData[cellId]) timetableData[cellId] = { text: "", color: "#ffffff", stamp: "none" };
+            if (!timetableData[cellId]) timetableData[cellId] = { text: "", color: "#ffffff" };
             
-            if (selectedVal.startsWith('stamp-')) {
-                timetableData[cellId].stamp = selectedVal.replace('stamp-', '');
-                colorSelect.value = timetableData[cellId].color;
-            } else if (selectedVal === 'none') {
-                timetableData[cellId].stamp = "none";
-                colorSelect.value = timetableData[cellId].color;
-            } else {
-                timetableData[cellId].color = selectedVal;
-                colorSelect.style.backgroundColor = selectedVal;
-            }
-
+            timetableData[cellId].color = selectedVal;
+            colorSelect.style.backgroundColor = selectedVal;
             timetableData[cellId].text = textVal;
-            localStorage.setItem('myTimetable', JSON.stringify(timetableData));
             
+            localStorage.setItem('myTimetable', JSON.stringify(timetableData));
             document.getElementById(cellId).parentElement.parentElement.style.backgroundColor = timetableData[cellId].color;
-            document.getElementById(`${cellId}-stampDisplay`).textContent = timetableData[cellId].stamp === "none" ? "" : timetableData[cellId].stamp;
             updateSubjectDropdown();
         }
 
@@ -451,8 +490,7 @@
                 localStorage.setItem('ownedStamps', JSON.stringify(ownedStamps));
                 updatePointsDisplay();
                 renderShop();
-                renderStickerPalette(); // シール帳を更新
-                renderTimetable();      // 時間割の選択肢を更新
+                renderStickerPalette(); 
                 alert('スタンプを解放しました！ホーム画面のシール帳から使ってみてね！');
             }
         }
@@ -530,7 +568,6 @@
                 });
                 grid.appendChild(dayCell);
             }
-            // カレンダー描画時に、その月用のスタンプも再描画する
             renderPlacedStamps();
         }
 
@@ -568,35 +605,68 @@
             if (tasks.length === 0) return view.innerHTML = '<p style="color:gray;">未完了の課題はありません。✨</p>';
             tasks.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(t => {
                 const item = document.createElement('div'); item.className = 'list-item'; item.style.borderLeft = `4px solid ${t.color || '#e53e3e'}`;
-                item.innerHTML = `<span>${t.subject ? `<span class="subject-badge">${t.subject}</span>` : ''}<strong>${t.title}</strong><br><small>締切: ${t.date}</small></span> <button class="btn-delete btn-done" onclick="completeTask(${t.id}, '${t.title}', '${t.date}')">完了</button>`;
+                item.innerHTML = `<span>${t.subject ? `<span class="subject-badge">${t.subject}</span> ` : ''}<strong>${t.title}</strong><br><small>締切: ${t.date}</small></span> <button class="btn-delete btn-done" onclick="completeTask(${t.id}, '${t.title}', '${t.date}')">完了</button>`;
                 view.appendChild(item);
             });
         }
 
+        // ===== メモ機能 =====
         function addMemo() {
-            const v = document.getElementById('memoInput').value; if (!v) return;
-            memos.push({ id: Date.now(), text: v }); localStorage.setItem('myMemos', JSON.stringify(memos)); document.getElementById('memoInput').value = ''; renderMemos();
+            const input = document.getElementById('memoInput');
+            const text = input.value.trim();
+            if (!text) return alert('メモを入力してください！');
+            
+            memos.push({ id: Date.now(), text: text });
+            localStorage.setItem('myMemos', JSON.stringify(memos));
+            input.value = '';
+            renderMemos();
         }
-        function deleteMemo(id) { memos = memos.filter(m => m.id !== id); localStorage.setItem('myMemos', JSON.stringify(memos)); renderMemos(); }
+
+        function deleteMemo(id) {
+            memos = memos.filter(m => m.id !== id);
+            localStorage.setItem('myMemos', JSON.stringify(memos));
+            renderMemos();
+        }
+
         function renderMemos() {
-            const view = document.getElementById('memoListView'); view.innerHTML = '';
-            if (memos.length === 0) return view.innerHTML = '<p style="color:gray;">メモはありません。</p>';
+            const view = document.getElementById('memoListView');
+            view.innerHTML = '';
+            
+            if (memos.length === 0) {
+                view.innerHTML = '<p style="color:gray; font-size: 0.9em;">メモはありません。</p>';
+                return;
+            }
+            
             memos.forEach(m => {
-                const item = document.createElement('div'); item.className = 'list-item'; item.style.borderLeft = '4px solid #ecc94b';
-                item.innerHTML = `<span>${m.text}</span> <button class="btn-delete" onclick="deleteMemo(${m.id})">削除</button>`; view.appendChild(item);
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerHTML = `
+                    <span>${m.text}</span>
+                    <button class="btn-delete" onclick="deleteMemo(${m.id})">削除</button>
+                `;
+                view.appendChild(item);
             });
         }
 
-        // 初期化処理
-        updatePointsDisplay();
-        renderTimetable();
-        renderStickerPalette();
-        initPalette('eventColorPalette', selectedEventColor, c => selectedEventColor = c);
-        initPalette('taskColorPalette', selectedTaskColor, c => selectedTaskColor = c);
-        renderCalendar(); 
-        renderTasks(); 
-        renderMemos();
-        updateSubjectDropdown();
+        // ===== 初期化処理 =====
+        function initApp() {
+            updatePointsDisplay();
+            renderTimetable();
+            renderTasks();
+            renderMemos();
+            renderCalendar();
+            renderStickerPalette();
+            
+            initPalette('eventColorPalette', selectedEventColor, (color) => {
+                selectedEventColor = color;
+            });
+            initPalette('taskColorPalette', selectedTaskColor, (color) => {
+                selectedTaskColor = color;
+            });
+        }
+
+        // アプリ起動
+        initApp();
     </script>
 </body>
 </html>
