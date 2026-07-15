@@ -69,7 +69,6 @@
         .cell-stamp-display { position: absolute; top: 4px; left: 4px; font-size: 1.1em; pointer-events: none; z-index: 2; }
         .cell-color-picker { position: absolute; bottom: 4px; right: 4px; width: 14px; height: 14px; border-radius: 50%; border: 1px solid #a0aec0; background-color: #ffffff; appearance: none; cursor: pointer; color: transparent; padding: 0; margin: 0; z-index: 5; }
         
-        /* 🌟 今回追加した修正：リストの中身は見えなくならないように文字色を黒に指定 🌟 */
         .cell-color-picker option { color: #333; background-color: #fff; }
 
         /* カレンダー */
@@ -243,6 +242,7 @@
         let currentDate = new Date();
         let selectedEventColor = '#c6f6d5'; 
         let selectedTaskColor = '#fed7d7';  
+        let editingTaskId = null;
 
         // ===== 画面切り替えロジック =====
         function switchView(viewId) {
@@ -589,9 +589,81 @@
         function addTask() {
             const s = document.getElementById('taskSubject').value, t = document.getElementById('taskTitle').value, d = document.getElementById('taskDate').value;
             if (!t || !d) return alert('入力してください！');
-            tasks.push({ id: Date.now(), subject: s, title: t, date: d, color: selectedTaskColor });
-            localStorage.setItem('myTasks', JSON.stringify(tasks)); document.getElementById('taskTitle').value = ''; document.getElementById('taskDate').value = ''; renderTasks(); renderCalendar();
+            
+            if (editingTaskId) {
+                const index = tasks.findIndex(task => task.id === editingTaskId);
+                if (index !== -1) {
+                    tasks[index].subject = s;
+                    tasks[index].title = t;
+                    tasks[index].date = d;
+                    tasks[index].color = selectedTaskColor;
+                }
+                editingTaskId = null;
+                document.querySelector('#view-tasks .btn').textContent = '追加する';
+                const cancelBtn = document.getElementById('cancelEditBtn');
+                if(cancelBtn) cancelBtn.remove();
+            } else {
+                tasks.push({ id: Date.now(), subject: s, title: t, date: d, color: selectedTaskColor });
+            }
+            
+            localStorage.setItem('myTasks', JSON.stringify(tasks));
+            document.getElementById('taskTitle').value = ''; 
+            document.getElementById('taskDate').value = ''; 
+            renderTasks(); 
+            renderCalendar();
         }
+
+        function editTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+            
+            document.getElementById('taskSubject').value = task.subject || '';
+            document.getElementById('taskTitle').value = task.title;
+            document.getElementById('taskDate').value = task.date;
+            
+            selectedTaskColor = task.color || '#fed7d7';
+            initPalette('taskColorPalette', selectedTaskColor, (color) => selectedTaskColor = color);
+
+            editingTaskId = id;
+            
+            const submitBtn = document.querySelector('#view-tasks .btn');
+            submitBtn.textContent = '更新する';
+            
+            if (!document.getElementById('cancelEditBtn')) {
+                const cancelBtn = document.createElement('button');
+                cancelBtn.id = 'cancelEditBtn';
+                cancelBtn.className = 'btn';
+                cancelBtn.style.backgroundColor = '#a0aec0';
+                cancelBtn.style.marginTop = '10px';
+                cancelBtn.textContent = '編集をキャンセル';
+                cancelBtn.onclick = cancelEdit;
+                submitBtn.parentNode.appendChild(cancelBtn);
+            }
+            
+            document.getElementById('card-tasks').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            editingTaskId = null;
+            document.getElementById('taskSubject').value = '';
+            document.getElementById('taskTitle').value = '';
+            document.getElementById('taskDate').value = '';
+            
+            document.querySelector('#view-tasks .btn').textContent = '追加する';
+            const cancelBtn = document.getElementById('cancelEditBtn');
+            if(cancelBtn) cancelBtn.remove();
+        }
+
+        function deleteTask(id) {
+            if(confirm('この課題を削除してよろしいですか？')) {
+                tasks = tasks.filter(t => t.id !== id);
+                localStorage.setItem('myTasks', JSON.stringify(tasks));
+                if (editingTaskId === id) cancelEdit();
+                renderTasks();
+                renderCalendar();
+            }
+        }
+
         function completeTask(id, taskTitle, taskDeadline) {
             const today = new Date(); today.setHours(0,0,0,0);
             const deadline = new Date(taskDeadline); deadline.setHours(0,0,0,0);
@@ -601,12 +673,24 @@
             alert(`完了しました！✨${msg}`);
             tasks = tasks.filter(t => t.id !== id); localStorage.setItem('myTasks', JSON.stringify(tasks)); renderTasks(); renderCalendar();
         }
+
         function renderTasks() {
             const view = document.getElementById('taskListView'); view.innerHTML = '';
             if (tasks.length === 0) return view.innerHTML = '<p style="color:gray;">未完了の課題はありません。✨</p>';
             tasks.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(t => {
                 const item = document.createElement('div'); item.className = 'list-item'; item.style.borderLeft = `4px solid ${t.color || '#e53e3e'}`;
-                item.innerHTML = `<span>${t.subject ? `<span class="subject-badge">${t.subject}</span> ` : ''}<strong>${t.title}</strong><br><small>締切: ${t.date}</small></span> <button class="btn-delete btn-done" onclick="completeTask(${t.id}, '${t.title}', '${t.date}')">完了</button>`;
+                item.innerHTML = `
+                    <span style="flex-grow: 1;">
+                        ${t.subject ? `<span style="background:#edf2f7; padding:2px 6px; border-radius:4px; font-size:0.8em; margin-right:5px; color:#4a5568;">${t.subject}</span> ` : ''}
+                        <strong>${t.title}</strong><br>
+                        <small style="color:#718096;">締切: ${t.date}</small>
+                    </span> 
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-delete" style="background-color: #ecc94b; color: #2d3748;" onclick="editTask(${t.id})">編集</button>
+                        <button class="btn-delete" style="background-color: #e53e3e;" onclick="deleteTask(${t.id})">削除</button>
+                        <button class="btn-delete btn-done" onclick="completeTask(${t.id}, '${t.title}', '${t.date}')">完了</button>
+                    </div>
+                `;
                 view.appendChild(item);
             });
         }
