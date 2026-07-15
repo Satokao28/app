@@ -40,6 +40,7 @@
 
 # 設計図
 ## ユースケース図
+<img width="3600" height="2784" alt="ユースケース図" src="https://github.com/user-attachments/assets/10459272-5e84-4ca3-96b1-d30c900ac4ff" />
 
 
 ##クラス図
