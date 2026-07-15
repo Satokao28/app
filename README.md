@@ -40,16 +40,19 @@
 
 # 設計図
 ## ユースケース図
-<img width="1500" height="1500" alt="ユースケース図" src="https://github.com/user-attachments/assets/10459272-5e84-4ca3-96b1-d30c900ac4ff" />
+<img width="3600" height="2784" alt="ユースケース図" src="https://github.com/user-attachments/assets/09c77213-0c8b-4bbf-998b-8c63cab38efb" />
 
 ## クラス図
-
+<img width="1762" height="2191" alt="クラス図" src="https://github.com/user-attachments/assets/da67b248-bae9-4f84-8cc1-200add2455a8" />
 
 ## シーケンス図
-
-
+<img width="2816" height="4620" alt="シーケンス図" src="https://github.com/user-attachments/assets/daaea263-2c06-4b4a-97f6-36caf95ce271" />
 
 ## 状態遷移図
+![カレンダー]<img width="1424" height="1743" alt="状態遷移図_カレンダー" src="https://github.com/user-attachments/assets/a5bfa439-c71c-4697-81ec-eb560e7a6823" />
 
+![時間割]<img width="2237" height="683" alt="状態遷移図_時間割" src="https://github.com/user-attachments/assets/77cdd36f-7d36-45cb-b7c3-5eeb81f05f61" />
 
+![課題]<img width="1424" height="1287" alt="状態遷移図_課題" src="https://github.com/user-attachments/assets/71728bb0-4c68-4567-aa18-159a81405fbf" />
 
+![スタンプ]<img width="1868" height="1031" alt="状態遷移図_スタンプ" src="https://github.com/user-attachments/assets/58a1b9df-31a4-4176-84fc-ae1db346daef" />
