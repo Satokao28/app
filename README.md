@@ -40,16 +40,16 @@
 
 # 設計図
 ## ユースケース図
-<img width="3600" height="2784" alt="ユースケース図" src="https://github.com/user-attachments/assets/10459272-5e84-4ca3-96b1-d30c900ac4ff" />
+<img width="1500" height="1500" alt="ユースケース図" src="https://github.com/user-attachments/assets/10459272-5e84-4ca3-96b1-d30c900ac4ff" />
+
+## クラス図
 
 
-##クラス図
-
-
-
-##シーケンス図
+## シーケンス図
 
 
 
-##状態遷移図
+## 状態遷移図
+
+
 
